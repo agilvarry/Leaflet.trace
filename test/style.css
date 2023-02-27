@@ -1,0 +1,35 @@
+html,
+body,
+#map {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    color: "black"
+
+}
+
+svg {
+    fill: black;
+}
+
+.draw-control-disabled {
+    filter: contrast(15%) brightness(175%);
+    pointer-events: none;
+}
+
+.leaflet-container a {
+    color: #0078A8;
+}
+
+.disabled {
+    visibility: hidden;
+}
+
+svg {
+    fill: gray;
+}
+
+svg:hover {
+    fill: blue;
+}
