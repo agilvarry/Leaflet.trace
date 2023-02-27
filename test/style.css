@@ -18,9 +18,9 @@ svg {
     pointer-events: none;
 }
 
-.leaflet-container a {
+/* .leaflet-container a {
     color: #0078A8;
-}
+} */
 
 .disabled {
     visibility: hidden;
@@ -30,6 +30,6 @@ svg {
     fill: gray;
 }
 
-svg:hover {
+/* svg:hover {
     fill: blue;
-}
+} */

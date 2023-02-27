@@ -8,31 +8,33 @@
     />
     <title>Leaflet Trace Demo</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="../node_modules/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" type="text/css" href="../node_modules/leaflet-draw/dist/leaflet.draw.css" />
-	<link rel="stylesheet" type="text/css" href="../node_modules/leaflet-toolbar/dist/leaflet.toolbar.css" />
-    <script src="../node_modules/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
     <script src="../node_modules/leaflet-geometryutil/src/leaflet.geometryutil.js"></script>
-    <script src="../node_modules/leaflet-toolbar/dist/leaflet.toolbar-src.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
+    <link rel="stylesheet" type="text/css" href="../node_modules/leaflet-draw/dist/leaflet.draw.css" />
     <script src="../node_modules/leaflet-draw/dist/leaflet.draw.js"></script>
+    <link rel="stylesheet" type="text/css" href="../node_modules/leaflet-toolbar/dist/leaflet.toolbar.css" />
+    <script src="../node_modules/leaflet-toolbar/dist/leaflet.toolbar-src.js"></script>
     <script type="module" src="../dist/build.js"></script>
-    
+
     <style>
-		html, body {
-			height: 100%;
-			margin: 0;
-		}
-		.leaflet-container {
-			height: 400px;
-			width: 600px;
-			max-width: 100%;
-			max-height: 100%;
-		}
-	</style>
-    
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      .leaflet-container {
+        height: 400px;
+        width: 600px;
+        max-width: 100%;
+        max-height: 100%;
+      }
+    </style>
   </head>
   <body>
     <div id="map"></div>
   </body>
+  
   <script type="module" src="main.js"></script>
 </html>
