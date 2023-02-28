@@ -1,0 +1,14 @@
+.draw-control-disabled {
+    filter: contrast(15%) brightness(175%);
+    pointer-events: none;
+}
+
+.disabled {
+    visibility: hidden;
+}
+
+a.leaflet-toolbar-icon > svg {
+    fill: gray;
+    padding-top: .3em;
+    width: 2em;
+}

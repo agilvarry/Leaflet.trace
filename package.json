@@ -1,12 +1,15 @@
 {
   "name": "leaflet-trace",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Simple tool to select and trace lines in leaflet",
-  "main": "index.js",
+  "main": "leaflet.trace.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "analyzer": "webpack --json | webpack-bundle-size-analyzer",
+    "build": "webpack",
     "start": "webpack serve --open",
-    "build": "webpack"
+    "watch": "webpack --watch",
+    "analyze": "webpack --profile --json > dist/stats.json"
   },
   "repository": {
     "type": "git",

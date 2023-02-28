@@ -1,7 +1,4 @@
-// import "./Leaflet.AlmostOver/src/leaflet.almostover.js";
-// import "./leaflet-draw-toolbar/leaflet.draw-toolbar.js";
-// import "./leaflet-draw-toolbar/leaflet.draw-toolbar.css";
-import {line, select, unselect, select2} from './icons'
+import {line, select, unselect} from './icons'
 import {
   polygon as turfPoly,
   lineString as turfLineString,
@@ -112,28 +109,15 @@ L.Draw.Trace = L.Draw.Polyline.extend({
 
     // markersLength must be greater than or equal to 2 before intersections can occur && must have latlng from drawing along selected
     if (
-      (markersLength >= 2 &&
-        !this.options.allowIntersection &&
-        this._poly.newLatLngIntersects(latlng)) ||
-      !latlng
-    ) {
+      (markersLength >= 2 && !this.options.allowIntersection && this._poly.newLatLngIntersects(latlng)) || !latlng) {
       this._showErrorTooltip();
       return;
     } else if (this._errorShown) {
       this._hideErrorTooltip();
     } else {
       //get the line ratio of the current point, and generate all points needed to draw line
-      const endRatio = L.GeometryUtil.locateOnLine(
-        this._map,
-        this.closest,
-        this.almostLatLng
-      );
-      const extraction = L.GeometryUtil.extract(
-        this._map,
-        this.closest,
-        this.startRatio,
-        endRatio
-      );
+      const endRatio = L.GeometryUtil.locateOnLine(this._map, this.closest, this.almostLatLng);
+      const extraction = L.GeometryUtil.extract(this._map, this.closest, this.startRatio, endRatio);
 
       this._markers = extraction.map((e) => this._createMarker(e)); //create new marker list, which is added to the map
       this._poly.setLatLngs(extraction); //set the points of the line
@@ -153,23 +137,14 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     }
   },
   _onMouseDown: function (e) {
-    if (
-      !this._clickHandled &&
-      !this._touchHandled &&
-      !this._disableMarkers &&
-      this.almostLatLng != false
-    ) {
+    if (!this._clickHandled && !this._touchHandled && !this._disableMarkers && this.almostLatLng != false) {
       this._map.dragging.disable();
       this._onMouseMove(e);
       this._clickHandled = true;
       this._disableNewMarkers();
       this.lineStart = true;
       this.closest = this._setClosest();
-      this.startRatio = L.GeometryUtil.locateOnLine(
-        this._map,
-        this.closest,
-        this.almostLatLng
-      );
+      this.startRatio = L.GeometryUtil.locateOnLine(this._map, this.closest, this.almostLatLng);
       this._startPoint.call(this, this.almostLatLng.lng, this.almostLatLng.lat);
     }
   },
@@ -195,32 +170,18 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this.lineStart = false;
   },
 
-  //TODO: this function is an absolute mess and i need to address it
-  _endPoint: function (e) {
-    if (this._mouseDownOrigin) {
-      this.addVertex(e.latlng);
-      this._finishShape();
-      //TODO: I disabled all of this and kept the parts of the code that allow the line to end
-      // I need to spend more time looking at this to make sure there isn't something here I need, especially in regards to touch scree stuff
-
-      // if (this._mouseDownOrigin) {
-      // 	var dragCheckDistance = L.point(clientX, clientY)
-      // 		.distanceTo(this._mouseDownOrigin);
-      // 	var lastPtDistance = this._calculateFinishDistance(e.latlng);
-      // 	if (this.options.maxPoints > 1 && this.options.maxPoints == this._markers.length + 1) {
-      // 		this.addVertex(e.latlng);
-      // 		this._finishShape();
-      // 	} else if (lastPtDistance < 10 && L.Browser.touch) { //TODO: need to keep this in some form for touch screens???
-      // 		this._finishShape();
-      // 	} else if (Math.abs(dragCheckDistance) < 9 * (window.devicePixelRatio || 1)) {
-      // 		this.addVertex(e.latlng);
-      // 	}
-      // 	this._enableNewMarkers(); // after a short pause, enable new markers
-      // }
-      this._enableNewMarkers(); // after a short pause, enable new markers
-    }
-    this._mouseDownOrigin = null;
-  },
+ /**
+   * TODO: there is some mysterious logic in the origial _endPoint from Draw.Polyline regarding
+   * drag Check Ditance and window.devicePixelRatio that I haven't taken the trouble to understand
+   * if there are issues down the line that could be the cause 
+   **/
+ _endPoint: function (_clientX, _clientY, _e) {
+  if (this._mouseDownOrigin) {
+    this._finishShape();
+    this._enableNewMarkers(); // after a short pause, enable new markers
+  }
+  this._mouseDownOrigin = null;
+}, 
   _createMarker: function (latlng) {
     var marker = new L.Marker(latlng, {
       icon: this.options.icon,
@@ -228,31 +189,14 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     });
     return marker;
   },
-  _updateRunningMeasure: function (latlng, added) {
-    var markersLength = this._markers.length,
-      previousMarkerIndex,
-      distance;
-
-    if (this._markers.length === 1) {
-      this._measurementRunningTotal = 0;
-    } else {
-      previousMarkerIndex = markersLength - (added ? 2 : 1);
-
-      // Calculate the distance based on the version
-      if (L.GeometryUtil.isVersion07x()) {
-        distance =
-          latlng.distanceTo(this._markers[previousMarkerIndex].getLatLng()) *
-          (this.options.factor || 1);
-      } else {
-        distance =
-          this._map.distance(
-            latlng,
-            this._markers[previousMarkerIndex].getLatLng()
-          ) * (this.options.factor || 1);
+  _updateRunningMeasure: function (_latlng, _added) {
+    this._measurementRunningTotal = 0;
+    if (this._markers.length > 1) {    
+      // Calculate the length of the line from the existing markers
+      for (let i = 1; i < this._markers.length; i++){
+        this._measurementRunningTotal += this._map.distance(this._markers[i-1].getLatLng(), this._markers[i].getLatLng()) * (this.options.factor || 1);
       }
-
-      this._measurementRunningTotal += distance * (added ? 1 : -1);
-    }
+    } 
   },
 });
 
@@ -265,13 +209,13 @@ L.Draw.Select = L.Draw.Rectangle.extend({
   statics: {
     TYPE: "select",
   },
-
+  
   initialize: function (map, options) {
     // Save the type so super can fire, need to do this as cannot do this.TYPE :(
     L.Draw.Rectangle.prototype.initialize.call(this, map, options);
     this._map = map;
     this._initialLabelText = "Click and drag to select a line.";
-
+    this.options.showArea = false
     this.type = L.Draw.Select.TYPE;
   },
 
@@ -287,7 +231,6 @@ L.Draw.Select = L.Draw.Rectangle.extend({
       }
     });
     this.selected = s;
-
     // this.selectedItem = new L.FeatureGroup().addTo(this._map);
     this._map.on(L.Draw.Event.CREATED, this._created, this);
   },
@@ -374,25 +317,17 @@ L.Draw.Select = L.Draw.Rectangle.extend({
   },
 });
 
-//see if i can run disable select elsewhere
-L.Toolbar2.DrawAction.CancelTrace = L.Toolbar2.DrawAction.Cancel.extend({
-  initialize: function () {
-    disableSelect(); //diable select on draw button here because this is the first place where it's alrady initalized
-    L.Toolbar2.DrawAction.Cancel.prototype.initialize.call(this);
-  },
-});
-
 L.Toolbar2.DrawAction.Trace = L.Toolbar2.DrawAction.fromHandler(
   L.Draw.Trace,
   {
     className: "leaflet-draw-draw-polyline",
     tooltip: L.drawLocal.draw.toolbar.buttons.polyline,
   },
-  new L.Toolbar2({ actions: [L.Toolbar2.DrawAction.CancelTrace] })
+  new L.Toolbar2({ actions: [L.Toolbar2.DrawAction.Cancel] })
 ).extend({
   options: {
     toolbarIcon: {
-      className: "trace-line",
+      className: "trace-line draw-control-disabled",
       html: line,
       tooltip: "Draw a line",
     },

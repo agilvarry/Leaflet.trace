@@ -8,11 +8,11 @@ module.exports = {
   entry: "./src/leaflet.trace.js",
   output: {
     filename: "build.js",
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "demo"),
   },
   devtool: "inline-source-map",
   devServer: {
-    static: "./dist",
+    static: "./demo",
   },  plugins: [
     new BundleAnalyzerPlugin()
   ],

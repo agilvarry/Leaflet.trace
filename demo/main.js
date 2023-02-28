@@ -10,10 +10,11 @@ const baseLayers = {
   OpenStreetMap: osm,
 };
 
-const udotRoutes = L.geoJSON().addTo(map);
-const drawnItems = new L.FeatureGroup().addTo(map);
+let udotRoutes = L.geoJSON().addTo(map);
+const drawnItems = new L.featureGroup().addTo(map);
 L.esri.featureLayer({
   url: "https://maps.udot.utah.gov/randh/rest/services/PrimaryRoutes/MapServer/0",
+  useCors: true
 })
   .query()
   .returnM(true)
@@ -37,7 +38,7 @@ L.esri.featureLayer({
   });
 
 const overlays = {
-  "Primary Routes": udotRoutes,
+  "Routes": udotRoutes,
   "Drawn Items": drawnItems,
 };
 
