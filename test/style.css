@@ -28,8 +28,11 @@ svg {
 
 svg {
     fill: gray;
+    padding-top: .3em;
+    width: 2em;
 }
 
-/* svg:hover {
-    fill: blue;
-} */
+
+/* style="opacity:1;vector-effect:none;fill:#373737;fill-opacity:1;stroke:none;stroke-width:4;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:3.20000005;stroke-opacity:.55063291" */
+/* style="opacity:1;vector-effect:none;fill:#373737;fill-opacity:1;stroke:none;stroke-width:3.26598692;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:3.20000005;stroke-opacity:.55063291" */
+/* style="opacity:1;vector-effect:none;fill:#373737;fill-opacity:1;stroke:none;stroke-width:3.2659862;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:3.20000005;stroke-opacity:.55063291" id="rect950-6" */

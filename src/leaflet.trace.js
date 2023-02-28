@@ -1,6 +1,6 @@
-import "./Leaflet.AlmostOver/src/leaflet.almostover.js";
-import "./leaflet-draw-toolbar/leaflet.draw-toolbar.js";
-import "./leaflet-draw-toolbar/leaflet.draw-toolbar.css";
+// import "./Leaflet.AlmostOver/src/leaflet.almostover.js";
+// import "./leaflet-draw-toolbar/leaflet.draw-toolbar.js";
+// import "./leaflet-draw-toolbar/leaflet.draw-toolbar.css";
 import {line, select, unselect, select2} from './icons'
 import {
   polygon as turfPoly,

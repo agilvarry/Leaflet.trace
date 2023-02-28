@@ -1,5 +1,5 @@
 const map = L.map("map").setView([40.758701, -111.876183], 13);
-console.log("hi");
+
 const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution:
@@ -11,7 +11,7 @@ const baseLayers = {
 };
 
 const udotRoutes = L.geoJSON().addTo(map);
-const drawnItems = new L.featureGroup().addTo(map);
+const drawnItems = new L.FeatureGroup().addTo(map);
 L.esri.featureLayer({
   url: "https://maps.udot.utah.gov/randh/rest/services/PrimaryRoutes/MapServer/0",
 })
@@ -41,19 +41,30 @@ const overlays = {
   "Drawn Items": drawnItems,
 };
 
+L.control.layers(baseLayers, overlays).addTo(map);
+
 new L.Toolbar2.Trace({
   position: "topleft",
 }).addTo(map);
-let selected;
 
-map.on("layeradd", function (e) {
-  if (e.layer.options.name == "selected") {
-    selected = e.layer;
-  }
-});
 
+new L.Control.Draw({
+  draw: false,
+  edit: {
+    featureGroup: drawnItems,
+  },
+}).addTo(map);
+
+
+/**
+ * Listeners
+ *
+ */
+
+
+//listens for when a feature is drawn
 map.on("draw:created", (e) => {
   if (e.layerType !== "select") {
     drawnItems.addLayer(e.layer);
-  }
+  } 
 });
