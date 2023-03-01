@@ -1,14 +1,24 @@
-.draw-control-disabled {
+/* at the moment trace has no function when it first loads */
+.leaflet-draw-toolbar .leaflet-draw-draw-trace {
     filter: contrast(15%) brightness(175%);
     pointer-events: none;
+    background-image: url('images/trace-line.svg');
 }
 
-.disabled {
-    visibility: hidden;
+.leaflet-draw-toolbar .leaflet-draw-draw-trace-active {
+    background-image: url('images/trace-line.svg');
+    background-size: auto;
+
 }
 
-a.leaflet-toolbar-icon > svg {
-    fill: gray;
-    padding-top: .3em;
-    width: 2em;
+.leaflet-draw-toolbar .leaflet-draw-draw-select {
+    background-image: url('images/select.svg');
+    background-size: auto;
+
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-unselect {
+    background-image: url('images/select-clear.svg');
+    background-size: auto;
+
 }

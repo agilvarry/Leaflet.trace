@@ -1,4 +1,3 @@
-import {line, select, unselect} from './icons'
 import {
   polygon as turfPoly,
   lineString as turfLineString,
@@ -6,12 +5,12 @@ import {
 } from "@turf/helpers";
 
 import booleanIntersects from "@turf/boolean-intersects";
-
-/**
+ /**
  * @class L.Draw.Trace
  * @aka Draw.Trace
  * @inherits L.Draw.Trace
  */
+
 L.Draw.Trace = L.Draw.Polyline.extend({
   statics: {
     TYPE: "trace",
@@ -234,12 +233,13 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     // this.selectedItem = new L.FeatureGroup().addTo(this._map);
     this._map.on(L.Draw.Event.CREATED, this._created, this);
   },
-  enableSelect: function () {
-    const button = document.getElementsByClassName("trace-line")[0];
-    button.onClick = null;
-    button.className = "trace-line leaflet-toolbar-icon";
-  },
+  _enableSelect: function () {
+    const button = document.getElementsByClassName("leaflet-draw-draw-trace")[0];
+    if(button){
+      button.className = "leaflet-draw-draw-trace-active";
+    }
 
+  },
   removeHooks: function () {
     L.Draw.Rectangle.prototype.removeHooks.call(this);
     delete this.selected;
@@ -313,87 +313,212 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     }).addTo(this._map);
     this._map.addLayer(this.selected);
     this._map.almostOver.addLayer(this.selected);
-    this.enableSelect();
+    this._enableSelect();
   },
 });
 
-L.Toolbar2.DrawAction.Trace = L.Toolbar2.DrawAction.fromHandler(
-  L.Draw.Trace,
-  {
-    className: "leaflet-draw-draw-polyline",
-    tooltip: L.drawLocal.draw.toolbar.buttons.polyline,
-  },
-  new L.Toolbar2({ actions: [L.Toolbar2.DrawAction.Cancel] })
-).extend({
-  options: {
-    toolbarIcon: {
-      className: "trace-line draw-control-disabled",
-      html: line,
-      tooltip: "Draw a line",
-    },
-  },
-});
+/**
+ * @event draw:unselect: String
+ *
+ * Triggered when Draw.Unselect button is click and a line was selected
+ */
 
-L.Toolbar2.DrawAction.Select = L.Toolbar2.DrawAction.fromHandler(
-  L.Draw.Select,
-  {
-    className: "leaflet-draw-draw-rectangle",
-    tooltip: L.drawLocal.draw.toolbar.buttons.rectangle,
-  },
-  new L.Toolbar2({ actions: [L.Toolbar2.DrawAction.Cancel] })
-).extend({
-  options: {
-    toolbarIcon: {
-      html: select,
-      tooltip: "Select a line",
-    },
-  },
-});
+L.Draw.Event.UNSELECT = 'draw:unselect';
 
-L.Toolbar2.DrawAction.RemoveSelect = L.Toolbar2.Action.extend({
-  options: {
-    toolbarIcon: {
-      html: unselect,
-      tooltip: "Un-select the line",
-    },
+
+
+/**
+ * @class L.Draw.Unselect
+ * @aka Draw.Unselect
+ */
+L.Draw.Unselect = L.Handler.extend({
+  statics: {
+    TYPE: "unselect",
   },
-  initialize: function (map) {
-    this._map = map;
+	// @method initialize(): void
+	initialize: function (map, options) {
+		this._map = map;
+    this.type = L.Draw.Unselect.TYPE;
+		L.setOptions(this, options);
 
-    L.Toolbar2.Action.prototype.initialize.call(this);
+		var version = L.version.split('.');
+		//If Version is >= 1.2.0
+		if (parseInt(version[0], 10) === 1 && parseInt(version[1], 10) >= 2) {
+			L.Draw.Unselect.include(L.Evented.prototype);
+		} else {
+			L.Draw.Unselect.include(L.Mixin.Events);
+		}
+	},
+  disableSelect: function(){
+    const button = document.getElementsByClassName("leaflet-draw-draw-trace-active")[0];
+    if(button){
+      button.className = "leaflet-draw-draw-trace";
+    }
   },
-
-  addHooks: function () {
-    let s;
-    this._map.eachLayer(function (layer) {
-      if (layer.options.name && layer.options.name == "selected") {
-        s = layer;
-      }
-    });
-    this.selected = s;
-
+  unselect: function(){
     if (this.selected) {
       this._map.almostOver.removeLayer(this.selected);
       this._map.removeLayer(this.selected);
-      disableSelect();
+      this.disableSelect();
     }
   },
+	// @method enable(): void
+	// Enables this handler
+	enable: function () {
+		if (this._enabled) {
+			return;
+		}
+
+		L.Handler.prototype.enable.call(this);
+
+		this.fire('enabled', {handler: this.type});
+	},
+
+	// @method disable(): void
+	disable: function () {
+		if (!this._enabled) {
+			return;
+		}
+
+		L.Handler.prototype.disable.call(this);
+		this.fire('disabled', {handler: this.type});
+	},
+
+	// @method addHooks(): void
+	// Add's event listeners to this handler
+	addHooks: function () {
+    if(this._map){
+      let s;
+      this._map.eachLayer(function (layer) {
+        if (layer.options.name && layer.options.name == "selected") {
+          s = layer;
+        }
+      });
+      this.selected = s;
+    }
+    this.unselect()
+	},
+
+	// @method removeHooks(): void
+	// Removes event listeners from this handler
+	removeHooks: function () {
+		if (this._map) {
+			delete this.selected;
+		}
+	},
 });
 
-L.Toolbar2.Trace = L.Toolbar2.Control.extend({
+L.TraceToolbar = L.Toolbar.extend({
+  statics: {
+		TYPE: 'trace'
+	},
   options: {
-    actions: [
-      L.Toolbar2.DrawAction.Select,
-      L.Toolbar2.DrawAction.RemoveSelect,
-      L.Toolbar2.DrawAction.Trace
-    ],
+    select: {},
+    unselect: {},
+    trace: {}
   },
+  initialize: function (options) {
+		// Ensure that the options are merged correctly since L.extend is only shallow
+		for (var type in this.options) {
+			if (this.options.hasOwnProperty(type)) {
+				if (options[type]) {
+					options[type] = L.extend({}, this.options[type], options[type]);
+				}
+			}
+		}
+
+		this._toolbarClass = 'leaflet-draw-draw';
+		L.Toolbar.prototype.initialize.call(this, options);
+	},
+
+  getModeHandlers: function (map) {
+		return [
+      {
+        enabled: true,
+        handler: new L.Draw.Select(map),
+        title: "Select a line to trace",
+      },
+      {
+        enabled: true,
+        handler: new L.Draw.Unselect(map),
+        title: "Remove line selection",
+      },
+      {
+        enabled: true,
+        handler: new L.Draw.Trace(map),
+        title: "Trace a line",
+      },
+		];
+	},
+  getActions: function (handler) {
+		return [
+			{
+        enabled: handler.type == 'unselect' ? false : true,
+				title: L.drawLocal.draw.toolbar.actions.title,
+				text: L.drawLocal.draw.toolbar.actions.text,
+				callback: this.disable,
+				context: this
+			}
+		];
+	},
 });
 
-const disableSelect = () => {
-  const button = document.getElementsByClassName("trace-line")[0];
 
-  // disable button
-  button.onClick = "preventEventDefault(); return false";
-  button.className = "trace-line leaflet-toolbar-icon draw-control-disabled";
-};
+
+L.Control.Trace = L.Control.Draw.extend({
+  initialize: function (options) {
+		if (L.version < '0.7') {
+			throw new Error('Leaflet.draw 0.2.3+ requires Leaflet 0.7.0+. Download latest from https://github.com/Leaflet/Leaflet/');
+		}
+
+		L.Control.prototype.initialize.call(this, options);
+
+		var toolbar;
+
+		this._toolbars = {};
+    if (L.TraceToolbar && this.options.trace) {
+      
+      toolbar = new L.TraceToolbar(this.options.draw);
+
+      this._toolbars[L.TraceToolbar.TYPE] = toolbar;
+
+      // Listen for when toolbar is enabled
+      this._toolbars[L.TraceToolbar.TYPE].on('enable', this._toolbarEnabled, this);
+    }
+
+		// Initialize toolbars
+		if (L.DrawToolbar && this.options.draw) {
+			toolbar = new L.DrawToolbar(this.options.draw);
+
+			this._toolbars[L.DrawToolbar.TYPE] = toolbar;
+
+			// Listen for when toolbar is enabled
+			this._toolbars[L.DrawToolbar.TYPE].on('enable', this._toolbarEnabled, this);
+		}
+
+		if (L.EditToolbar && this.options.edit) {
+			toolbar = new L.EditToolbar(this.options.edit);
+
+			this._toolbars[L.EditToolbar.TYPE] = toolbar;
+
+			// Listen for when toolbar is enabled
+			this._toolbars[L.EditToolbar.TYPE].on('enable', this._toolbarEnabled, this);
+		}
+		L.toolbar = this; //set global var for editing the toolbar
+	},
+  // initialize: function (options) {
+    
+  //   L.Control.Draw.prototype.initialize.call(this, options);
+	// 	// Initialize toolbars
+		
+	// 	if (L.TraceToolbar && this.options.trace) {
+      
+	// 		toolbar = new L.TraceToolbar(this.options.draw);
+
+	// 		this._toolbars[L.TraceToolbar.TYPE] = toolbar;
+
+	// 		// Listen for when toolbar is enabled
+	// 		this._toolbars[L.TraceToolbar.TYPE].on('enable', this._toolbarEnabled, this);
+	// 	}
+	// },
+})

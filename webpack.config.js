@@ -1,18 +1,19 @@
 const path = require("path");
 
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const prod = process.env.NODE_ENV !== "production";
 
 module.exports = {
-  mode: "development",
+  mode: "production",
   entry: "./src/leaflet.trace.js",
   output: {
     filename: "build.js",
-    path: path.resolve(__dirname, "demo"),
+    path: path.resolve(__dirname, "dist"),
   },
   devtool: "inline-source-map",
   devServer: {
-    static: "./demo",
+    static: "./dist",
   },  plugins: [
     new BundleAnalyzerPlugin()
   ],
@@ -25,7 +26,12 @@ module.exports = {
     rules: [
       {
         test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        use: [ prod ? "style-loader" : MiniCssExtractPlugin.loader, "style-loader", "css-loader"],
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
+        // More information here https://webpack.js.org/guides/asset-modules/
+        type: "asset",
       },
     ],
   },

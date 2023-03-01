@@ -2,6 +2,8 @@
  Simple tool to select and trace lines
 
 TODO:
-*Update README to say something useful
--issue when releasing Select tool over toolbar, investigate leaflet.draw for potential solution.
+-Update README to say something useful
 -investigate use in touch screens. It's probably not quite right.
+
+MAYBE:
+-enable drag-draw anywhere when no line is selected?
