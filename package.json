@@ -1,6 +1,6 @@
 {
   "name": "leaflet-trace",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Simple tool to select and trace lines in leaflet",
   "main": "leaflet.trace.js",
   "scripts": {
