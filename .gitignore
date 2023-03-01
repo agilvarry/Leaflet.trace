@@ -129,3 +129,4 @@ demo
 .npmignore
 package-lock.json
 webpack.config.js
+.npmrc
