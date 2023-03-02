@@ -1,15 +1,17 @@
-import {
-  polygon as turfPoly,
-  lineString as turfLineString,
-  multiLineString as turfMultiLineString,
-} from "@turf/helpers";
 
-import booleanIntersects from "@turf/boolean-intersects";
+// import {
+//   polygon as turfPoly,
+//   lineString as turfLineString,
+//   multiLineString as turfMultiLineString,
+// } from "@turf/helpers";
+
+// import booleanIntersects from "@turf/boolean-intersects";
+
  /**
  * @class L.Draw.Trace
  * @aka Draw.Trace
  * @inherits L.Draw.Trace
- */
+ */ 
 
 L.Draw.Trace = L.Draw.Polyline.extend({
   statics: {
@@ -256,7 +258,7 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     const latlngs = this._latlngToArray(e.layer.getLatLngs());
     latlngs[0].push(latlngs[0][0]); //add first pair to back to satisfy turf.js
 
-    const selectPoly = turfPoly(latlngs);
+    const selectPoly = turf.polygon(latlngs);
     //search map for a selectable layer
     this._map.eachLayer((layer) => {
       if (layer.options.selectable) {
@@ -277,7 +279,7 @@ L.Draw.Select = L.Draw.Rectangle.extend({
       let line = this._grabTurfLine(layer);
 
       if (line) {
-        const intersect = booleanIntersects(rect, line);
+        const intersect = turf.booleanIntersects(rect, line);
         if (intersect) {
           selected = layer;
         }
@@ -292,9 +294,9 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     const lineType = layer.feature.geometry.type;
     const latlngs = this._latlngToArray(layer.getLatLngs());
     if (lineType == "LineString") {
-      return turfLineString(latlngs);
+      return turf.lineString(latlngs);
     } else if (lineType == "MultiLineString") {
-      return turfMultiLineString(latlngs);
+      return turf.multiLineString(latlngs);
     }
     return line;
   },
@@ -316,16 +318,6 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     this._enableSelect();
   },
 });
-
-/**
- * @event draw:unselect: String
- *
- * Triggered when Draw.Unselect button is click and a line was selected
- */
-
-L.Draw.Event.UNSELECT = 'draw:unselect';
-
-
 
 /**
  * @class L.Draw.Unselect
@@ -408,6 +400,9 @@ L.Draw.Unselect = L.Handler.extend({
 	},
 });
 
+/**
+ * @class L.TraceToolbar
+ */
 L.TraceToolbar = L.Toolbar.extend({
   statics: {
 		TYPE: 'trace'
@@ -464,7 +459,9 @@ L.TraceToolbar = L.Toolbar.extend({
 });
 
 
-
+/**
+ * @class L.Control.Trace
+ */
 L.Control.Trace = L.Control.Draw.extend({
   initialize: function (options) {
 		if (L.version < '0.7') {
@@ -506,19 +503,4 @@ L.Control.Trace = L.Control.Draw.extend({
 		}
 		L.toolbar = this; //set global var for editing the toolbar
 	},
-  // initialize: function (options) {
-    
-  //   L.Control.Draw.prototype.initialize.call(this, options);
-	// 	// Initialize toolbars
-		
-	// 	if (L.TraceToolbar && this.options.trace) {
-      
-	// 		toolbar = new L.TraceToolbar(this.options.draw);
-
-	// 		this._toolbars[L.TraceToolbar.TYPE] = toolbar;
-
-	// 		// Listen for when toolbar is enabled
-	// 		this._toolbars[L.TraceToolbar.TYPE].on('enable', this._toolbarEnabled, this);
-	// 	}
-	// },
 })

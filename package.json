@@ -2,7 +2,6 @@
   "name": "leaflet-trace",
   "version": "0.0.4",
   "description": "Simple tool to select and trace lines in leaflet",
-  "main": "leaflet.trace.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "analyzer": "webpack --json | webpack-bundle-size-analyzer",
@@ -25,14 +24,11 @@
     "url": "https://github.com/agilvarry/Leaflet.trace/issues"
   },
   "homepage": "https://github.com/agilvarry/Leaflet.trace#readme",
-  "legacy-peer-deps": "true",
-  "dependencies": {
+  "peerDependencies": {
+    "leaflet": "^1.0.0",
     "leaflet-almostover": "^1.0.1",
     "leaflet-draw": "^1.0.4",
     "leaflet-geometryutil": "^0.10.1"
-  },
-  "peerDependencies": {
-    "leaflet": "^1.9.3"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^11.0.0",
