@@ -2,9 +2,8 @@
 
 This plugin is an extension for Leaflet.Draw that includes a new set of tools which allow the user to select a line and trace along it.
 
-It requires [Leaflet.GeometryUtil](https://github.com/makinacorpus/Leaflet.GeometryUtil/), [Leaflet.AlmostOver](https://github.com/makinacorpus/Leaflet.AlmostOver) and [Leaflet.Draw](https://github.com/Leaflet/Leaflet.draw).
+It requires [Leaflet.GeometryUtil](https://github.com/makinacorpus/Leaflet.GeometryUtil/), [Leaflet.AlmostOver](https://github.com/makinacorpus/Leaflet.AlmostOver), [Leaflet.Draw](https://github.com/Leaflet/Leaflet.draw) and [@turf/turf](https://github.com/Turfjs/turf)
 
-It was bundled with [@turf/boolean-intersects and @turf/helpers](https://github.com/Turfjs/turf) using [webpack](https://webpack.js.org/).
 
 ## Demo
 Play with it [here](https://agilvarry.github.io/Leaflet.trace/)
