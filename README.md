@@ -7,7 +7,7 @@ It requires [Leaflet.GeometryUtil](https://github.com/makinacorpus/Leaflet.Geome
 It was bundled with [@turf/boolean-intersects and @turf/helpers](https://github.com/Turfjs/turf) using [webpack](https://webpack.js.org/).
 
 ## Demo
-Play with it [here](https://agilvarry.github.io/Leaflet.trace/index.html)
+Play with it [here](https://agilvarry.github.io/Leaflet.trace/)
 ## Usage
 
 Leaflet.Trace mainly extends L.Control.Draw to add a new set of 3 tools that work together to allow users to tract alone selected line. 
