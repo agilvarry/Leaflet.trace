@@ -1,7 +1,7 @@
 {
   "name": "leaflet-trace",
   "version": "0.1.1",
-  "main": "src/leafle.trace.js",
+  "main": "dist/leaflet.trace.js",
   "files": [
     "dist",
     "src"
