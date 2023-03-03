@@ -1,40 +1,124 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta
       name="viewport"
-      content="initial-scale=1, maximum-scale=1, user-scalable=no" 
+      content="initial-scale=1, maximum-scale=1, user-scalable=no"
     />
     <title>Leaflet Trace Demo</title>
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+      crossorigin=""
+    ></script>
     <script src="https://unpkg.com/leaflet-geometryutil@0.10.1/src/leaflet.geometryutil.js"></script>
     <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw-src.css" />
-    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>   
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw-src.css"
+    />
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
     <script src="https://unpkg.com/leaflet-almostover@1.0.1/src/leaflet.almostover.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-    
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-trace@0.1.0/dist/leaflet.trace.css" />
-    <script type="module" src="https://unpkg.com/leaflet-trace@0.1.0/dist/leaflet.trace.js"></script>
-    
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-trace@0.1.0/dist/leaflet.trace.css"
+    />
+    <script
+      type="module"
+      src="https://unpkg.com/leaflet-trace@0.1.0/dist/leaflet.trace.js"
+    ></script>
+
     <style>
       html,
       body,
       #map {
-          padding: 0;
-          margin: 0;
-          height: 100%; 
-          width: 100%;
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
       }
     </style>
   </head>
   <body>
     <div id="map"></div>
   </body>
-  
-  <script type="module" src="main.js"></script>
+
+  <script type="module" src="main.js">
+       window.onload = function () {
+
+    const map = L.map("map").setView([40.758701, -111.876183], 13);
+
+    const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+
+    const baseLayers = {
+      OpenStreetMap: osm,
+    };
+
+    let udotRoutes = L.geoJSON().addTo(map);
+    const drawnItems = new L.featureGroup().addTo(map);
+    L.esri
+      .featureLayer({
+        url: "https://maps.udot.utah.gov/randh/rest/services/PrimaryRoutes/MapServer/0",
+        useCors: true,
+      })
+      .query()
+      .returnM(true)
+      .run(function (error, featureCollection, response) {
+        if (error) {
+          console.log(error);
+          return;
+        }
+
+        const geoJSONFeatureCollection = {
+          type: "FeatureCollection",
+          features: [],
+          selectable: true,
+        };
+
+        featureCollection.features.forEach((feature) => {
+          geoJSONFeatureCollection.features.push(feature);
+        });
+        udotRoutes.addData(geoJSONFeatureCollection);
+        udotRoutes.options.selectable = true;
+      });
+
+    const overlays = {
+      Routes: udotRoutes,
+      "Drawn Items": drawnItems,
+    };
+
+    L.control.layers(baseLayers, overlays).addTo(map);
+
+    new L.Control.Trace({
+      trace: true,
+      draw: true,
+      edit: {
+        featureGroup: drawnItems,
+      },
+    }).addTo(map);
+
+    /**
+     * Listeners
+     *
+     */
+    map.on("draw:created", (e) => {
+      if (e.layerType !== "select") {
+        drawnItems.addLayer(e.layer);
+      }
+    });
+       };
+  </script>
 </html>

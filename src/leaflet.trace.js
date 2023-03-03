@@ -1,13 +1,4 @@
-
-// import {
-//   polygon as turfPoly,
-//   lineString as turfLineString,
-//   multiLineString as turfMultiLineString,
-// } from "@turf/helpers";
-
-// import booleanIntersects from "@turf/boolean-intersects";
-
- /**
+/**
  * @class L.Draw.Trace
  * @aka Draw.Trace
  * @inherits L.Draw.Trace

@@ -1,20 +1,15 @@
 {
   "name": "leaflet-trace",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "src/leafle.trace.js",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
-  "prepublishOnly": "webpack --mode=production",
-  "description": "Simple tool to select and trace lines in leaflet",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "analyzer": "webpack --json | webpack-bundle-size-analyzer",
-    "build": "webpack",
-    "start": "webpack serve --open",
-    "watch": "webpack --watch",
-    "analyze": "webpack --profile --json > dist/stats.json"
+    "minify": "uglifyjs src/leaflet.trace.js -o dist/leaflet.trace.js & npx postcss src/leaflet.trace.css > dist/leaflet.trace.css"
   },
+  "description": "Simple tool to select and trace lines in leaflet",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/agilvarry/Leaflet.trace.git"
@@ -30,24 +25,21 @@
   },
   "homepage": "https://github.com/agilvarry/Leaflet.trace#readme",
   "dependencies": {
+    "@turf/boolean-intersects": "^6.5.0",
+    "@turf/helpers": "^6.5.0",
     "leaflet-almostover": "^1.0.1",
     "leaflet-draw": "^1.0.4",
-    "leaflet-geometryutil": "^0.10.1",
-    "@turf/boolean-intersects": "^6.5.0",
-    "@turf/helpers": "^6.5.0"
+    "leaflet-geometryutil": "^0.10.1"
   },
   "peerDependencies": {
     "leaflet": "^1.2.0"
   },
+  "readmeFilename": "README.md",
   "devDependencies": {
-    "copy-webpack-plugin": "^11.0.0",
-    "css-loader": "^6.7.3",
-    "mini-css-extract-plugin": "^2.7.2",
-    "style-loader": "^3.3.1",
-    "webpack": "^5.75.0",
-    "webpack-bundle-analyzer": "^4.8.0",
-    "webpack-cli": "^5.0.1",
-    "webpack-dev-server": "^4.11.1"    
-  },
-  "readmeFilename": "README.md"
+    "cssnano": "^5.1.15",
+    "csso": "^5.0.5",
+    "postcss": "^8.4.21",
+    "postcss-cli": "^10.1.0",
+    "uglify-js": "^3.17.4"
+  }
 }
