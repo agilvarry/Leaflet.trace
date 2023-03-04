@@ -347,25 +347,27 @@ L.Draw.Unselect = L.Handler.extend({
   },
 	// @method enable(): void
 	// Enables this handler
-	enable: function () {
-		if (this._enabled) {
-			return;
-		}
+	// enable: function () {
+	// 	if (this._enabled) {
+      
+	// 		return;
+	// 	}
 
-		L.Handler.prototype.enable.call(this);
+	// 	L.Handler.prototype.enable.call(this);
 
-		this.fire('enabled', {handler: this.type});
-	},
+	// 	this.fire('enabled', {handler: this.type});
+	// },
 
-	// @method disable(): void
-	disable: function () {
-		if (!this._enabled) {
-			return;
-		}
-
-		L.Handler.prototype.disable.call(this);
-		this.fire('disabled', {handler: this.type});
-	},
+	// // @method disable(): void
+	// disable: function () {
+	// 	if (!this._enabled) {
+	// 		return;
+	// 	}
+   
+	// 	L.Handler.prototype.disable.call(this);
+  //   console.log("hello")
+	// 	this.fire('disabled', {handler: this.type});
+	// },
 
 	// @method addHooks(): void
 	// Add's event listeners to this handler
