@@ -107,12 +107,17 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     } else if (this._errorShown) {
       this._hideErrorTooltip();
     } else {
-      //get the line ratio of the current point, and generate all points needed to draw line
-      const endRatio = L.GeometryUtil.locateOnLine(this._map, this.closest, this.almostLatLng);
-      const extraction = L.GeometryUtil.extract(this._map, this.closest, this.startRatio, endRatio);
 
-      this._markers = extraction.map((e) => this._createMarker(e)); //create new marker list, which is added to the map
-      this._poly.setLatLngs(extraction); //set the points of the line
+      //get the line slice from the start point and current point,
+      //generate all points needed to draw line
+      const stop = turf.point([this.almostLatLng.lng, this.almostLatLng.lat]);
+      const latlngs = this._latlngToArray(this.closest.getLatLngs());
+      const line = turf.lineString(latlngs)
+      const slice = turf.lineSlice(this.start, stop, line);
+      const latLngs= slice.geometry.coordinates.map(ll => L.latLng(ll[1], ll[0])); 
+
+      this._markers = latLngs.map((e) => this._createMarker(e)); //create new marker list, which is added to the map
+      this._poly.setLatLngs(latLngs); //set the points of the line
 
       if (this._poly.getLatLngs().length === 2) {
         this._map.addLayer(this._poly);
@@ -136,7 +141,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
       this._disableNewMarkers();
       this.lineStart = true;
       this.closest = this._setClosest();
-      this.startRatio = L.GeometryUtil.locateOnLine(this._map, this.closest, this.almostLatLng);
+      this.start = turf.point([this.almostLatLng.lng, this.almostLatLng.lat]);
       this._startPoint.call(this, this.almostLatLng.lng, this.almostLatLng.lat);
     }
   },
@@ -144,6 +149,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     if (Array.isArray(lls)) return lls.map((ll) => this._latlngToArray(ll));
     else return [lls.lng, lls.lat];
   },
+  
   _setClosest: function () {
     if (this.lineType == "LineString") {
       return this.selected;
@@ -241,7 +247,6 @@ L.Draw.Select = L.Draw.Rectangle.extend({
   _latlngToArray: function (lls) {
     if (Array.isArray(lls)) return lls.map((ll) => this._latlngToArray(ll));
     else return [lls.lng, lls.lat];
-    // });
   },
 
   _created: function (e) {
