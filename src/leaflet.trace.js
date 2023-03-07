@@ -56,34 +56,15 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._map
       .on("almost:move", this._almostMove, this)
       .on("almost:out", this._almostOut, this);
+  },
 
-    //TODO: sort how to store layer id and select more nicely here
-    let s;
-    this._map.eachLayer(function (layer) {
-      if (layer.options.name && layer.options.name == "selected") {
-        s = layer;
-      }
-    });
-    this.selected = s;
-    this.lineType = s.options.lineType;
-    if (this.lineType == "MultiLineString") {
-      this.getSegments(s);
-    }
-  },
-  getSegments: function (s) {
-    this.segments = s.getLatLngs().map((ll) => L.polyline(ll));
-  },
   removeHooks: function () {
     L.Draw.Polygon.prototype.removeHooks.call(this);
-    delete this.selected;
     delete this.almostLatLng;
-    delete this.startRatio;
     delete this.linestart;
     delete this._clickHandled;
     delete this._disableMarkers;
-    delete this.segments;
     delete this.closest;
-    delete this.lineType;
     this._map
       .off("almost:move", this._almostMove, this)
       .off("almost:out", this._almostOut, this);
@@ -110,11 +91,9 @@ L.Draw.Trace = L.Draw.Polyline.extend({
 
       //get the line slice from the start point and current point,
       //generate all points needed to draw line
-      const stop = turf.point([this.almostLatLng.lng, this.almostLatLng.lat]);
-      const latlngs = this._latlngToArray(this.closest.getLatLngs());
-      const line = turf.lineString(latlngs)
-      const slice = turf.lineSlice(this.start, stop, line);
-      const latLngs= slice.geometry.coordinates.map(ll => L.latLng(ll[1], ll[0])); 
+      const stop = turf.point([this.almostLatLng.lng, this.almostLatLng.lat]);      
+      const slice = turf.lineSlice(this.start, stop, this.closest);
+      const latLngs = slice.geometry.coordinates.map(ll => L.latLng(ll[1], ll[0])); 
 
       this._markers = latLngs.map((e) => this._createMarker(e)); //create new marker list, which is added to the map
       this._poly.setLatLngs(latLngs); //set the points of the line
@@ -140,8 +119,9 @@ L.Draw.Trace = L.Draw.Polyline.extend({
       this._clickHandled = true;
       this._disableNewMarkers();
       this.lineStart = true;
-      this.closest = this._setClosest();
+      
       this.start = turf.point([this.almostLatLng.lng, this.almostLatLng.lat]);
+      this.closest = this._map.almostOver.getClosest(this.almostLatLng).closestLine;
       this._startPoint.call(this, this.almostLatLng.lng, this.almostLatLng.lat);
     }
   },
@@ -150,18 +130,6 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     else return [lls.lng, lls.lat];
   },
   
-  _setClosest: function () {
-    if (this.lineType == "LineString") {
-      return this.selected;
-    } else {
-      return L.GeometryUtil.closestLayer(
-        this._map,
-        this.segments,
-        this.almostLatLng
-      ).layer;
-    }
-  },
-
   _onMouseUp: function (e) {
     L.Draw.Polyline.prototype._onMouseUp.call(this, e);
     this._map.dragging.enable();
@@ -285,6 +253,7 @@ L.Draw.Select = L.Draw.Rectangle.extend({
       this._drawSelect(selected);
     }
   },
+
   //convert layer into a turf line type
   _grabTurfLine: function (layer) {
     const lineType = layer.feature.geometry.type;
@@ -477,4 +446,201 @@ L.Control.Trace = L.Control.Draw.extend({
 		}
 		L.toolbar = this; //set global var for editing the toolbar
 	},
-})
+});
+
+L.Map.mergeOptions({
+  // @option almostOver: Boolean = true
+  // Set it to false to disable this plugin
+  almostOver: true,
+  // @option almostDistance: Number = 25
+  // Tolerance in pixels
+  almostDistance: 25,   // pixels
+  // @option almostSamplingPeriod: Number = 50
+  // To reduce the 'mousemove' event frequency. In milliseconds
+  almostSamplingPeriod: 50,  // ms
+  // @option almostOnMouseMove Boolean = true
+  // Set it to false to disable track 'mousemove' events and improve performance
+  // if AlmostOver is only need for 'click' events.
+  almostOnMouseMove: true,
+});
+
+
+L.Handler.AlmostOver = L.Handler.extend({
+
+  includes: L.Evented || L.Mixin.Events,
+
+  initialize: function (map) {
+      this._map = map;
+      this._layers = [];
+      this._previous = null;
+      this._marker = null;
+      this._buffer = 0;
+
+      // Reduce 'mousemove' event frequency
+      this.__mouseMoveSampling = (function () {
+          let timer = new Date();
+          return function (e) {
+              let date = new Date(),
+                  filtered = (date - timer) < this._map.options.almostSamplingPeriod;
+              if (filtered || this._layers.length === 0) {
+                  return;  // Ignore movement
+              }
+              timer = date;
+              this._map.fire('mousemovesample', {latlng: e.latlng});
+          };
+      })();
+  },
+
+  addHooks: function () {
+      if (this._map.options.almostOnMouseMove) {
+          this._map.on('mousemove', this.__mouseMoveSampling, this);
+          this._map.on('mousemovesample', this._onMouseMove, this);
+      }
+      this._map.on('click dblclick', this._onMouseClick, this);
+
+      var map = this._map;
+      function computeBuffer() {
+          this._buffer = this._map.layerPointToLatLng([0, 0]).lat -
+                         this._map.layerPointToLatLng([this._map.options.almostDistance,
+                                                       this._map.options.almostDistance]).lat;
+      }
+      this._map.on('viewreset zoomend', computeBuffer, this);
+      this._map.whenReady(computeBuffer, this);
+  },
+
+  removeHooks: function () {
+      this._map.off('mousemovesample');
+      this._map.off('mousemove', this.__mouseMoveSampling, this);
+      this._map.off('click dblclick', this._onMouseClick, this);
+  },
+
+  addLayer: function (layer) {
+      if (typeof layer.eachLayer == 'function') {
+          layer.eachLayer(function (l) {
+              this.addLayer(l);
+          }, this);
+      }
+      else {
+          if (typeof this.indexLayer == 'function') {
+              this.indexLayer(layer);
+          }
+          this._layers.push(layer);
+      }
+  },
+
+  removeLayer: function (layer) {
+      if (typeof layer.eachLayer == 'function') {
+          layer.eachLayer(function (l) {
+              this.removeLayer(l);
+          }, this);
+      }
+      else {
+          if (typeof this.unindexLayer == 'function') {
+              this.unindexLayer(layer);
+          }
+          var index = this._layers.indexOf(layer);
+          if (0 <= index) {
+              this._layers.splice(index, 1);
+          }
+      }
+      this._previous = null;
+  },
+  //TODO: here is the main place we need to edit
+  getClosest: function (latlng) {
+      let distance = this._map.options.almostDistance;
+
+      const res = this._getClosest(latlng);
+      if (this.distance(latlng, res.latlng) <= distance ){
+          return res;
+      }
+      return null;
+  },
+  /** 
+   *   Shortcut function for planar distance between two {L.LatLng} at current zoom.
+   *   Originally in L.GeometryUtil
+   *   
+   *   @param {L.LatLng} latlngA geographical point A
+   *   @param {L.LatLng} latlngB geographical point B
+   *   @returns {Number} planar distance
+   */
+  distance: function (latlngA, latlngB) {
+      return this._map.latLngToLayerPoint(latlngA).distanceTo(this._map.latLngToLayerPoint(latlngB));
+  },
+
+  _getClosest: function(latlng) {
+      const point = turf.point([latlng.lng, latlng.lat])
+      let dist = Infinity;
+      let closestLine;
+      let closeLayer;
+      let closestPointOnLine;
+      this._layers.forEach(layer => {
+          const lineType = layer.options.lineType;
+          let lls = this._latlngToArray(layer.getLatLngs());
+          
+          if (lineType == "LineString") {
+              lls = [lls]
+          }
+
+          lls.forEach(coords => {
+              const line = turf.lineString(coords);
+              
+              const nearPoint = turf.nearestPointOnLine(line, point);
+              if (nearPoint.properties.dist < dist){
+                  dist = nearPoint.properties.dist;
+                  closestLine = line;
+                  closeLayer = layer;
+                  closestPointOnLine = nearPoint;
+              }       
+          });
+      });
+      return {
+          layer: closeLayer,
+          latlng: L.latLng(closestPointOnLine.geometry.coordinates[1], closestPointOnLine.geometry.coordinates[0]),
+          closestLine: closestLine,
+          pointOnLine: closestPointOnLine
+      }
+    },
+    _latlngToArray: function (lls) {
+      if (Array.isArray(lls)) return lls.map((ll) => this._latlngToArray(ll));
+      else return [lls.lng, lls.lat];
+    },
+
+  _onMouseMove: function (e) {
+      var closest = this.getClosest(e.latlng);
+      if (closest) {
+          console.log("hi")
+          if (!this._previous) {
+              this._map.fire('almost:over', {layer: closest.layer,
+                                             latlng: closest.latlng});
+          }
+          else if (L.stamp(this._previous.layer) != L.stamp(closest.layer)) {
+              this._map.fire('almost:out', {layer: this._previous.layer});
+              this._map.fire('almost:over', {layer: closest.layer,
+                                             latlng: closest.latlng});
+          }
+
+          this._map.fire('almost:move', {layer: closest.layer,
+                                         latlng: closest.latlng});
+      }
+      else {
+          if (this._previous) {
+              this._map.fire('almost:out', {layer: this._previous.layer});
+          }
+      }
+      this._previous = closest;
+  },
+
+  _onMouseClick: function (e) {
+      var closest = this.getClosest(e.latlng);
+      if (closest) {
+          this._map.fire('almost:' + e.type, {layer: closest.layer,
+                                              latlng: closest.latlng});
+      }
+  },
+});
+
+if (L.LayerIndexMixin !== undefined) {
+  L.Handler.AlmostOver.include(L.LayerIndexMixin);
+}
+
+L.Map.addInitHook('addHandler', 'almostOver', L.Handler.AlmostOver);

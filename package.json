@@ -1,6 +1,6 @@
 {
   "name": "leaflet-trace",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "main": "dist/leaflet.trace.js",
   "files": [
     "dist",
@@ -26,9 +26,7 @@
   "homepage": "https://github.com/agilvarry/Leaflet.trace#readme",
   "dependencies": {
     "@turf/turf": "^6.5.0",
-    "leaflet-almostover": "^1.0.1",
-    "leaflet-draw": "^1.0.4",
-    "leaflet-geometryutil": "^0.10.1"
+    "leaflet-draw": "^1.0.4"
   },
   "peerDependencies": {
     "leaflet": "^1.2.0"
@@ -39,6 +37,8 @@
     "csso": "^5.0.5",
     "postcss": "^8.4.21",
     "postcss-cli": "^10.1.0",
-    "uglify-js": "^3.17.4"
+    "uglify-js": "^3.17.4",
+    "leaflet-geometryutil": "^0.10.1",
+    "leaflet-almostover": "^1.0.1"
   }
 }
