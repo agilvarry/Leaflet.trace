@@ -11,8 +11,6 @@ Play with it [here](https://agilvarry.github.io/Leaflet.trace/)
 To include it in your app using a cdn add the following to the top of your html
 ```js
 <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw-src.css" />
-<script src="https://unpkg.com/leaflet-geometryutil@0.10.1/src/leaflet.geometryutil.js"></script>
-<script src="https://unpkg.com/leaflet-almostover@1.0.1/src/leaflet.almostover.js"></script>
 <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script> 
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-trace@0.1.6/dist/leaflet.trace.css" />
