@@ -55,7 +55,8 @@ L.Draw.Trace = L.Draw.Polyline.extend({
 
     this._map
       .on("almost:move", this._almostMove, this)
-      .on("almost:out", this._almostOut, this);
+      .on("almost:out", this._almostOut, this)
+      .on("mouseout", this.onMapOut, this);
   },
 
   removeHooks: function () {
@@ -67,7 +68,8 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     delete this.closest;
     this._map
       .off("almost:move", this._almostMove, this)
-      .off("almost:out", this._almostOut, this);
+      .off("almost:out", this._almostOut, this)
+      .off("mouseout", this.onMapOut, this);
   },
   _almostOut: function (e) {
     this.almostLatLng = false;
@@ -119,7 +121,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
       this._clickHandled = true;
       this._disableNewMarkers();
       this.lineStart = true;
-      
+      console.log("hi")
       this.start = turf.point([this.almostLatLng.lng, this.almostLatLng.lat]);
       this.closest = this._map.almostOver.getClosest(this.almostLatLng).closestLine;
       this._startPoint.call(this, this.almostLatLng.lng, this.almostLatLng.lat);
@@ -132,16 +134,34 @@ L.Draw.Trace = L.Draw.Polyline.extend({
   
   _onMouseUp: function (e) {
     L.Draw.Polyline.prototype._onMouseUp.call(this, e);
+
     this._map.dragging.enable();
     this.lineStart = false;
   },
-  _onMouseOut: function () {
-    L.Draw.Polyline.prototype._onMouseOut.call(this);
-		this._map.dragging.enable();
-    this.lineStart = false;
-    this._endPoint()
-    this._clickHandled = null;
-   
+
+  _getTooltipText: function () {
+		var showLength = this.options.showLength,
+			labelText, distanceStr;
+		if (this._markers.length === 0) {
+			labelText = {
+				text: L.drawLocal.draw.handlers.polyline.tooltip.start
+			};
+		} else {
+			distanceStr = showLength ? this._getMeasurementString() : '';
+
+			if (this._markers.length === 1) {
+				labelText = {
+					text: L.drawLocal.draw.handlers.polyline.tooltip.cont,
+					subtext: distanceStr
+				};
+			} else {
+				labelText = {
+					text: "Draw mouse to draw line, release to end",
+					subtext: distanceStr
+				};
+			}
+		}
+		return labelText;
 	},
 
  /**
