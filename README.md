@@ -16,7 +16,15 @@ To include it in your app using a cdn add the following to the top of your html
 <link rel="stylesheet" href="https://unpkg.com/leaflet-trace@0.1.6/dist/leaflet.trace.css" />
 <script type="module" src="https://unpkg.com/leaflet-trace@0.1.6/dist/leaflet.trace.js"></script>
 ```
-npm instructions coming soon...
+If you install using npm adding this to your html should do the trick:
+
+```js
+<link rel="stylesheet" type="text/css" href="../node_modules/leaflet/dist/leaflet.css"/>
+<script src="../node_modules/leaflet-draw/dist/leaflet.draw.js"></script>
+<script src="../node_modules/@turf/turf/turf.min.js" charset="utf-8"></script>
+<link rel="stylesheet" type="text/css" href="../node_modules/leaflet-trace/dist/leaflet.trace.css"/>
+<script src="../node_modules/leaflet-trace/dist/leaflet.trace.js"></script>
+```
 
 ## Usage
 Leaflet.Trace mainly extends L.Control.Draw to add a new set of 3 tools that work together to allow users to tract along a selected line. 
@@ -36,5 +44,14 @@ new L.Control.Trace({
   },
 }).addTo(map);
 
+```
+
+Leaflet.Trace works with [L.geoJSON](https://leafletjs.com/reference.html#geojson) layers that contain a [FeatureCollection](https://www.rfc-editor.org/rfc/rfc7946#section-3.3) made up of [LineString](https://www.rfc-editor.org/rfc/rfc7946#section-3.1.4) and [MultiLineString](https://www.rfc-editor.org/rfc/rfc7946#section-3.1.4) features.
+
+For Leaflet.Trace to be able to detect your L.geoJSON you need to give it an attribute of "trace" set to "true".
+
+```js
+const lines = L.geoJSON(featureCollection).addTo(map);
+lines.trace = true;
 ```
 
