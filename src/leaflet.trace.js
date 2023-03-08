@@ -200,7 +200,7 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     //TODO: make more elegant if i can
     let s;
     this._map.eachLayer(function (layer) {
-      if (layer.options.name && layer.options.name == "selected") {
+      if (layer.options.selected) {
         s = layer;
       }
     });
@@ -283,7 +283,7 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     this.selected = L.polyline(selected.getLatLngs(), {
       weight: 4,
       color: "gold",
-      name: "selected",
+      selected: true,
       lineType: selected.feature.geometry.type,
       properties: properties,
     }).addTo(this._map);
@@ -334,7 +334,7 @@ L.Draw.Unselect = L.Handler.extend({
     if(this._map){
       let s;
       this._map.eachLayer(function (layer) {
-        if (layer.options.name && layer.options.name == "selected") {
+        if (layer.options.selected) {
           s = layer;
         }
       });

@@ -59,17 +59,8 @@
           return;
         }
 
-        const geoJSONFeatureCollection = {
-          type: "FeatureCollection",
-          features: [],
-          selectable: true,
-        };
-
-        featureCollection.features.forEach((feature) => {
-          geoJSONFeatureCollection.features.push(feature);
-        });
-        udotRoutes.addData(geoJSONFeatureCollection);
-        udotRoutes.options.selectable = true;
+        udotRoutes.addData(featureCollection);
+        udotRoutes.trace = true;
       });
 
     const overlays = {

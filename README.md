@@ -31,6 +31,7 @@ Leaflet.Trace mainly extends L.Control.Draw to add a new set of 3 tools that wor
 
 It is initalized similarly to L.Control.Draw, with the addition of a trace option.
 
+# Example:
 ```javascript
 
 new L.Control.Trace({
@@ -50,8 +51,10 @@ Leaflet.Trace works with [L.geoJSON](https://leafletjs.com/reference.html#geojso
 
 For Leaflet.Trace to be able to detect your L.geoJSON you need to give it an attribute of "trace" set to "true".
 
+# Example:
 ```js
 const lines = L.geoJSON(featureCollection).addTo(map);
+
 lines.trace = true;
 ```
 
