@@ -7,7 +7,8 @@
     "src"
   ],
   "scripts": {
-    "minify": "uglifyjs src/leaflet.trace.js -o dist/leaflet.trace.js & npx postcss src/leaflet.trace.css > dist/leaflet.trace.css"
+    "minify": "uglifyjs src/leaflet.trace.js -o dist/leaflet.trace.js & npx postcss src/leaflet.trace.css > dist/leaflet.trace.css",
+    "prepublishOnly": "uglifyjs src/leaflet.trace.js -o dist/leaflet.trace.js & npx postcss src/leaflet.trace.css > dist/leaflet.trace.css"
   },
   "description": "Simple tool to select and trace lines in leaflet",
   "repository": {
