@@ -135,6 +135,14 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._map.dragging.enable();
     this.lineStart = false;
   },
+  _onMouseOut: function () {
+    L.Draw.Polyline.prototype._onMouseOut.call(this);
+		this._map.dragging.enable();
+    this.lineStart = false;
+    this._endPoint()
+    this._clickHandled = null;
+   
+	},
 
  /**
    * TODO: there is some mysterious logic in the origial _endPoint from Draw.Polyline regarding
@@ -225,7 +233,8 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     const selectPoly = turf.polygon(latlngs);
     //search map for a selectable layer
     this._map.eachLayer((layer) => {
-      if (layer.options.selectable) {
+      if (layer.trace) {
+        console.log(layer);
         this._manageSelect(selectPoly, layer);
       }
     });
@@ -548,11 +557,14 @@ L.Handler.AlmostOver = L.Handler.extend({
   //TODO: here is the main place we need to edit
   getClosest: function (latlng) {
       let distance = this._map.options.almostDistance;
-
-      const res = this._getClosest(latlng);
-      if (this.distance(latlng, res.latlng) <= distance ){
+      if (this._layers.length > 0){
+        const res = this._getClosest(latlng);
+        if (this.distance(latlng, res.latlng) <= distance ){
           return res;
+        }
       }
+      
+      
       return null;
   },
   /** 
@@ -608,7 +620,7 @@ L.Handler.AlmostOver = L.Handler.extend({
   _onMouseMove: function (e) {
       var closest = this.getClosest(e.latlng);
       if (closest) {
-          console.log("hi")
+         
           if (!this._previous) {
               this._map.fire('almost:over', {layer: closest.layer,
                                              latlng: closest.latlng});
