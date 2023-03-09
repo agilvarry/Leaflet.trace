@@ -1,6 +1,6 @@
 {
   "name": "leaflet-trace",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "main": "dist/leaflet.trace.js",
   "files": [
     "dist",
@@ -30,12 +30,11 @@
     "leaflet-draw": "^1.0.4"
   },
   "peerDependencies": {
-    "leaflet": "^1.2.0"
+    "leaflet": "^1.9.0"
   },
   "readmeFilename": "README.md",
   "devDependencies": {
     "cssnano": "^5.1.15",
-    "csso": "^5.0.5",
     "postcss": "^8.4.21",
     "postcss-cli": "^10.1.0",
     "uglify-js": "^3.17.4",

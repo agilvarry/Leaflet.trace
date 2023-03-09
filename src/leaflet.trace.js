@@ -50,13 +50,19 @@ L.Draw.Trace = L.Draw.Polyline.extend({
   },
 
   addHooks: function () {
+  this.mapContainer = document.getElementById(this._map._container.id);
+
+  
     L.Draw.Polyline.prototype.addHooks.call(this);
     this.almostLatLng = false;
 
     this._map
       .on("almost:move", this._almostMove, this)
       .on("almost:out", this._almostOut, this)
-      .on("mouseout", this.onMapOut, this);
+    this.mapContainer
+      .addEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
+     
+  
   },
 
   removeHooks: function () {
@@ -69,7 +75,10 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._map
       .off("almost:move", this._almostMove, this)
       .off("almost:out", this._almostOut, this)
-      .off("mouseout", this.onMapOut, this);
+      
+    this.mapContainer
+      .removeEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
+    delete this.mapContainer;
   },
   _almostOut: function (e) {
     this.almostLatLng = false;
@@ -121,7 +130,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
       this._clickHandled = true;
       this._disableNewMarkers();
       this.lineStart = true;
-      console.log("hi")
+    
       this.start = turf.point([this.almostLatLng.lng, this.almostLatLng.lat]);
       this.closest = this._map.almostOver.getClosest(this.almostLatLng).closestLine;
       this._startPoint.call(this, this.almostLatLng.lng, this.almostLatLng.lat);
@@ -137,6 +146,11 @@ L.Draw.Trace = L.Draw.Polyline.extend({
 
     this._map.dragging.enable();
     this.lineStart = false;
+  },
+  _onMouseLeave: function (trace){
+    trace._endPoint.call(trace);
+    trace._map.dragging.enable();
+    trace.lineStart = false;
   },
 
   _getTooltipText: function () {
@@ -254,7 +268,6 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     //search map for a selectable layer
     this._map.eachLayer((layer) => {
       if (layer.trace) {
-        console.log(layer);
         this._manageSelect(selectPoly, layer);
       }
     });
