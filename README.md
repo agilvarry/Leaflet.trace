@@ -27,7 +27,7 @@ If you install using npm adding this to your html should do the trick:
 ```
 
 ## Usage
-Leaflet.Trace mainly extends L.Control.Draw to add a new set of 3 tools that work together to allow users to tract along a selected line. 
+Leaflet.Trace mainly extends L.Control.Draw to add a new set of 3 tools that work together to allow users to trace along a selected line. 
 
 It is initalized similarly to L.Control.Draw, with the addition of a trace option.
 
