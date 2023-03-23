@@ -80,7 +80,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
       .removeEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
     delete this.mapContainer;
   },
-  _almostOut: function (e) {
+  _almostOut: function (_e) {
     this.almostLatLng = false;
   },
   _almostMove: function (e) {
@@ -170,7 +170,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
 				};
 			} else {
 				labelText = {
-					text: "Draw mouse to draw line, release to end",
+					text: "Drag mouse to draw line, release to end",
 					subtext: distanceStr
 				};
 			}
@@ -207,6 +207,45 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     } 
   },
 });
+
+/**
+ * @class L.Draw.TraceMarker
+ * @aka Draw.TraceMarker
+ * @inherits L.Draw.Marker
+ */
+L.Draw.TraceMarker = L.Draw.CircleMarker.extend({
+  
+  addHooks: function () {
+    L.Draw.Marker.prototype.addHooks.call(this);
+    this.almostLatLng = false;
+    this._initialLabelText = this.options.farText;
+    this._map
+      .on("almost:move", this._almostMove, this)
+      .on("almost:out", this._almostOut, this)
+    },
+  
+    removeHooks: function () {
+      L.Draw.Marker.prototype.removeHooks.call(this);
+      delete this.almostLatLng;
+      
+      this._map
+        .off("almost:move", this._almostMove, this)
+        .off("almost:out", this._almostOut, this)
+    },
+    _almostOut: function (_e) {
+      this._initialLabelText = this.options.farText;
+      this.almostLatLng = false;
+    },
+    _almostMove: function (e) {
+      console.log("hello")
+      this._initialLabelText = this.options.nearText;
+      this.almostLatLng = e.latlng;
+    }, 
+    _onMouseMove: function (e) {
+      L.Draw.CircleMarker.prototype._onMouseMove.call(this, e);
+			this.almostLatLng && this._marker.setLatLng(this.almostLatLng);
+	}
+}) 
 
 /**
  * @class L.Draw.Select
@@ -410,7 +449,7 @@ L.TraceToolbar = L.Toolbar.extend({
 		this._toolbarClass = 'leaflet-draw-draw';
 		L.Toolbar.prototype.initialize.call(this, options);
 	},
-
+  
   getModeHandlers: function (map) {
 		return [
       {
@@ -427,6 +466,11 @@ L.TraceToolbar = L.Toolbar.extend({
         enabled: true,
         handler: new L.Draw.Trace(map),
         title: "Trace a line",
+      },
+      {
+        enabled: true,
+        handler: new L.Draw.TraceMarker(map),
+        title: "Draw a CircleMarker that can snap to a selected line",
       },
 		];
 	},

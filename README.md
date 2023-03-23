@@ -13,8 +13,8 @@ To include it in your app using a cdn add the following to the top of your html
 <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw-src.css" />
 <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script> 
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet-trace@0.1.10/dist/leaflet.trace.css" />
-<script type="module" src="https://unpkg.com/leaflet-trace@0.1.10/dist/leaflet.trace.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-trace@0.2.0/dist/leaflet.trace.css" />
+<script type="module" src="https://unpkg.com/leaflet-trace@0.2.0/dist/leaflet.trace.js"></script>
 ```
 If you install using npm adding this to your html should do the trick:
 
@@ -27,7 +27,7 @@ If you install using npm adding this to your html should do the trick:
 ```
 
 ## Usage
-Leaflet.Trace mainly extends L.Control.Draw to add a new set of 3 tools that work together to allow users to trace along a selected line. 
+Leaflet.Trace mainly extends L.Control.Draw to add a new set of 3 tools that work together to allow users to trace along a selected line and snap a marker to a selected line. 
 
 It is initalized similarly to L.Control.Draw, with the addition of a trace option.
 
@@ -37,8 +37,7 @@ It is initalized similarly to L.Control.Draw, with the addition of a trace optio
 new L.Control.Trace({
   trace: true,
   draw: {
-    marker: false,
-    circlemarker: false,
+    circlemarker: false, //Leaflet.Trace includes a slightly altered version of the L.Draw.CircleMarker
   },
   edit: {
     featureGroup: drawnItems,
