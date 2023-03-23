@@ -237,7 +237,6 @@ L.Draw.TraceMarker = L.Draw.CircleMarker.extend({
       this.almostLatLng = false;
     },
     _almostMove: function (e) {
-      console.log("hello")
       this._initialLabelText = this.options.nearText;
       this.almostLatLng = e.latlng;
     }, 
