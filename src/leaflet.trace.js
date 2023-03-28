@@ -237,6 +237,7 @@ L.Draw.TraceMarker = L.Draw.CircleMarker.extend({
       this.almostLatLng = false;
     },
     _almostMove: function (e) {
+      console.log("hello")
       this._initialLabelText = this.options.nearText;
       this.almostLatLng = e.latlng;
     }, 
@@ -365,6 +366,15 @@ L.Draw.Select = L.Draw.Rectangle.extend({
 });
 
 /**
+ * @event draw:unselect: String
+ *
+ * The type of edit this is. One of: `edit`
+ *
+ * Triggered when the user starts edit mode by clicking the edit tool button.
+ */
+
+L.Draw.Event.UNSELECT = 'draw:unselect';
+/**
  * @class L.Draw.Unselect
  * @aka Draw.Unselect
  */
@@ -377,7 +387,7 @@ L.Draw.Unselect = L.Handler.extend({
 		this._map = map;
     this.type = L.Draw.Unselect.TYPE;
 		L.setOptions(this, options);
-
+    console.log("init")
 		var version = L.version.split('.');
 		//If Version is >= 1.2.0
 		if (parseInt(version[0], 10) === 1 && parseInt(version[1], 10) >= 2) {
@@ -391,13 +401,33 @@ L.Draw.Unselect = L.Handler.extend({
     if(button){
       button.className = "leaflet-draw-draw-trace";
     }
+    
   },
   unselect: function(){
     if (this.selected) {
       this._map.almostOver.removeLayer(this.selected);
       this._map.removeLayer(this.selected);
       this.disableSelect();
+      this._map.fire(L.Draw.Event.UNSELECT);
     }
+  },
+  enable: function () {
+    if (this._enabled) {
+      return;
+    }
+
+    L.Handler.prototype.enable.call(this);
+
+    this.fire("enabled", { handler: this.type });
+  },
+
+  // @method disable(): void
+  disable: function () {
+    if (!this._enabled) {
+      return;
+    }
+    L.Handler.prototype.disable.call(this);
+    this.fire("disabled", { handler: this.type });
   },
 	// @method addHooks(): void
 	// Add's event listeners to this handler
