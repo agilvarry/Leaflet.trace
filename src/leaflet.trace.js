@@ -237,7 +237,7 @@ L.Draw.TraceMarker = L.Draw.CircleMarker.extend({
       this.almostLatLng = false;
     },
     _almostMove: function (e) {
-      console.log("hello")
+     
       this._initialLabelText = this.options.nearText;
       this.almostLatLng = e.latlng;
     }, 
@@ -387,7 +387,7 @@ L.Draw.Unselect = L.Handler.extend({
 		this._map = map;
     this.type = L.Draw.Unselect.TYPE;
 		L.setOptions(this, options);
-    console.log("init")
+    
 		var version = L.version.split('.');
 		//If Version is >= 1.2.0
 		if (parseInt(version[0], 10) === 1 && parseInt(version[1], 10) >= 2) {
