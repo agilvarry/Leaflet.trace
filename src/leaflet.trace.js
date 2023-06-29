@@ -297,13 +297,26 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     if (Array.isArray(lls)) return lls.map((ll) => this._latlngToArray(ll));
     else return [lls.lng, lls.lat];
   },
+  _makePointSelect: function (latlng) {
+    const point = turf.point([latlng.lng, latlng.lat])
+    const buffer = turf.buffer(point, 0.025, {units: 'kilometers'})
+    const bbox = turf.bbox(buffer);
+    return turf.bboxPolygon(bbox);
+  },
+
+  _rectangleToPoly: function(latlngs) {
+    const lls = this._latlngToArray(latlngs)
+    lls[0].push(lls[0][0]); //add first pair to back to satisfy turf.js
+    return turf.polygon(lls);
+  },
 
   _created: function (e) {
     //create turfjs compatible feature from drawn rectangle
-    const latlngs = this._latlngToArray(e.layer.getLatLngs());
-    latlngs[0].push(latlngs[0][0]); //add first pair to back to satisfy turf.js
+    const selectPoly = this._rectangleToPoly(e.layer.getLatLngs());
+    // const latlngs = this._latlngToArray(e.layer.getLatLngs());
+    // latlngs[0].push(latlngs[0][0]); //add first pair to back to satisfy turf.js
 
-    const selectPoly = turf.polygon(latlngs);
+    // const selectPoly = turf.polygon(latlngs);
     //search map for a selectable layer
     this._map.eachLayer((layer) => {
       if (layer.trace) {
@@ -362,6 +375,16 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     this._map.addLayer(this.selected);
     this._map.almostOver.addLayer(this.selected);
     this._enableSelect();
+  },
+
+  _onMouseUp: function (_e) {
+    //this is if we click and unclick without moving the mouse, may trigger if we click a line
+    if (!this._shape) { 
+      const bbox = this._makePointSelect(this._startLatLng).bbox
+      this._shape = new L.Rectangle(new L.LatLngBounds(L.latLng(bbox[1], bbox[0]), L.latLng(bbox[3], bbox[2])));
+      L.Draw.SimpleShape.prototype._fireCreatedEvent.call(this, this._shape);
+    }
+    L.Draw.SimpleShape.prototype._onMouseUp.call(this);
   },
 });
 
