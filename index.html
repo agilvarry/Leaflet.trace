@@ -24,14 +24,14 @@
     />
     <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-    <!-- 
+    
     <link
       rel="stylesheet"
-      href="https://unpkg.com/leaflet-trace@0.2.6/dist/leaflet.trace.css"
-    /> -->
+      href="src/leaflet.trace.css"
+    />
     <script
       type="module"
-      src="https://unpkg.com/leaflet-trace@0.2.6/dist/leaflet.trace.js"
+      src="src/leaflet.trace.js"
     ></script>
 
     <style>
@@ -42,25 +42,6 @@
         margin: 0;
         height: 100%;
         width: 100%;
-      }
-      .leaflet-draw-toolbar-top .leaflet-draw-draw-trace {
-        filter: contrast(15%) brightness(175%);
-        pointer-events: none;
-        background-image: url("src/images/trace-line.svg");
-      }
-
-      .leaflet-draw-toolbar-top .leaflet-draw-draw-trace-active {
-        background-image: url("src/images/trace-line.svg");
-        background-size: auto;
-      }
-      .leaflet-draw-toolbar-top .leaflet-draw-draw-select {
-        background-image: url("src/images/select.svg");
-        background-size: auto;
-      }
-
-      .leaflet-draw-toolbar-top .leaflet-draw-draw-unselect {
-        background-image: url("src/images/select-clear.svg");
-        background-size: auto;
       }
     </style>
   </head>
