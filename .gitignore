@@ -129,5 +129,3 @@ demo
 .npmignore
 package-lock.json
 .npmrc
-
-src-dev

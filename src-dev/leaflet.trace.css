@@ -1,0 +1,46 @@
+.leaflet-draw-toolbar-top .leaflet-draw-draw-trace {
+    filter: contrast(15%) brightness(175%);
+    pointer-events: none;
+    background-image: url('images/trace-line.svg');
+}
+ 
+.leaflet-draw-toolbar-top .leaflet-draw-draw-trace-active {
+    background-image: url('images/trace-line.svg');
+    background-size: auto;
+
+}
+.leaflet-draw-toolbar-top .leaflet-draw-draw-select {
+    background-image: url('images/select.svg');
+    background-size: auto;
+
+}
+
+.leaflet-draw-toolbar-top .leaflet-draw-draw-unselect {
+    background-image: url('images/select-clear.svg');
+    background-size: auto;
+
+}
+
+.leaflet-retina .leaflet-draw-toolbar-top .leaflet-draw-draw-unselect {
+    background-image: url('images/select-clear.svg');
+    background-size: auto;
+
+}
+
+.leaflet-retina .leaflet-draw-toolbar-top .leaflet-draw-draw-trace {
+    filter: contrast(15%) brightness(175%);
+    pointer-events: none;
+    background-image: url('images/trace-line.svg');
+}
+ 
+.leaflet-retina .leaflet-draw-toolbar-top .leaflet-draw-draw-trace-active {
+    background-image: url('images/trace-line.svg');
+    background-size: auto;
+
+}
+
+.leaflet-retina .leaflet-draw-toolbar-top .leaflet-draw-draw-select {
+    background-image: url('images/select.svg');
+    background-size: auto;
+
+}
