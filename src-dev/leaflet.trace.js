@@ -57,9 +57,13 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._map
       .on("almost:move almost:touchstart", this._almostMove, this)
       .on("almost:out", this._almostOut, this)
-      .on("touchend touchcancel", this._onTouchEnd, this)
+      // .on("touchend touchcancel", this._onTouchEnd, this)
+      .on("touchmove", this._onTouchMove, this)
     this.mapContainer
       .addEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
+      document.addEventListener('touchstart', L.DomEvent.preventDefault, {passive: false});
+      L.DomEvent
+			.on(document, 'touchend', this._onTouchEnd, this);
      
   
   },
@@ -75,11 +79,16 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._map
       .off("almost:move almost:touchstart", this._almostMove, this)
       .off("almost:out", this._almostOut, this)
-      .off("touchend touchcancel", this._onTouchEnd, this)
+      // .off("touchend touchcancel", this._onTouchEnd, this)
+      .off("touchmove", this._onTouchMove, this)
+
       
     this.mapContainer
       .removeEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
     delete this.mapContainer;
+    document.removeEventListener('touchstart', L.DomEvent.preventDefault);
+    L.DomEvent.off(document, 'touchend', this._onMouseUp, this);
+
   },
   _almostOut: function (_e) {
     this.almostLatLng = false;
@@ -143,6 +152,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
   
     this.start = turf.point([this.almostLatLng.lng, this.almostLatLng.lat]);
     this.closest = this._map.almostOver.getClosest(this.almostLatLng).closestLine;
+    console.log(this.almostLatLng)
     this._startPoint.call(this, this.almostLatLng.lng, this.almostLatLng.lat);
   },
   
@@ -152,14 +162,14 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._map.dragging.enable();
     this.lineStart = false;
   },
-  _onMouseLeave: function (trace){
-    trace._endPoint.call(trace);
-    trace._map.dragging.enable();
-    trace.lineStart = false;
+  _onMouseLeave: function (e){
+    console.log("hi")
+    this._endPoint.call(e);
+    this._map.dragging.enable();
+    this.lineStart = false;
   },
 
   _onTouchMove: function (e) {
-    console.log(e)
     const newPos = this._map.mouseEventToLayerPoint(e.originalEvent.touches[0]);
 		const	latlng = this._map.layerPointToLatLng(newPos);
 
@@ -169,13 +179,17 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     L.DomEvent.preventDefault(e.originalEvent);
 		
     if (this.lineStart) {
+     
       this.addVertex(this.almostLatLng);
     }
 		
   },
 
   _onTouchEnd: function(e){
+    console.log("hi")
     //TODO: see mouseup
+    this._endPoint.call(e);
+
     this._map.dragging.enable();
     this.lineStart = false;
   },
@@ -781,7 +795,6 @@ L.Handler.AlmostOver = L.Handler.extend({
     },
 
   _onMouseMove: function (e) {
-    console.log(e)
       var closest = this.getClosest(e.latlng);
       if (closest) {
          
