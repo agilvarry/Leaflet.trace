@@ -48,9 +48,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
   },
 
   addHooks: function () {
-  this.mapContainer = document.getElementById(this._map._container.id);
-    
-  
+    this.mapContainer = document.getElementById(this._map._container.id);
     L.Draw.Polyline.prototype.addHooks.call(this);
     this.almostLatLng = false;
 
@@ -64,6 +62,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
   },
 
   removeHooks: function () {
+    this._map.dragging.enable();
     L.Draw.Polygon.prototype.removeHooks.call(this);
     delete this.almostLatLng;
     delete this.linestart;
@@ -149,13 +148,10 @@ L.Draw.Trace = L.Draw.Polyline.extend({
   
   _onMouseUp: function (e) {
     L.Draw.Polyline.prototype._onMouseUp.call(this, e);
-
-    this._map.dragging.enable();
     this.lineStart = false;
   },
   _onMouseLeave: function (trace){
     trace._endPoint.call(trace);
-    trace._map.dragging.enable();
     trace.lineStart = false;
   },
 
@@ -176,7 +172,6 @@ L.Draw.Trace = L.Draw.Polyline.extend({
 
   _onTouchEnd: function(e){    
     this._endPoint.call(e);
-    this._map.dragging.enable();
     this.lineStart = false;
     L.DomEvent.off(document, 'touchend', ()=>{this._onTouchEnd(this)})
   },
@@ -310,7 +305,8 @@ L.Draw.Select = L.Draw.Rectangle.extend({
   // @method addHooks(): void
   // Add listener hooks to this handler.
   addHooks: function () {
-    L.Draw.Rectangle.prototype.addHooks.call(this);
+    L.Draw.SimpleShape.prototype.addHooks.call(this);
+
     let s;
     this._map.eachLayer(function (layer) {
       if (layer.options.selected) {
@@ -426,16 +422,16 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     L.Draw.SimpleShape.prototype._onMouseUp.call(this);
   },
 
-  _onMouseMove: function (e) {
-		var latlng = e.latlng;
+  // _onMouseMove: function (e) {
+	// 	var latlng = e.latlng;
 
-		this._tooltip.updatePosition(latlng);
-		if (this._isDrawing) {
-      console.log("latlng")
-			this._tooltip.updateContent(this._getTooltipText());
-			this._drawShape(latlng);
-		}
-	},
+	// 	this._tooltip.updatePosition(latlng);
+	// 	if (this._isDrawing) {
+  //     console.log(this._map.dragging._enabled)
+	// 		this._tooltip.updateContent(this._getTooltipText());
+	// 		this._drawShape(latlng);
+	// 	}
+	// },
 });
 
 /**
