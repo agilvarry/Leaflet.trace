@@ -49,7 +49,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
 
   addHooks: function () {
   this.mapContainer = document.getElementById(this._map._container.id);
-
+    
   
     L.Draw.Polyline.prototype.addHooks.call(this);
     this.almostLatLng = false;
@@ -57,14 +57,11 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._map
       .on("almost:move almost:touchstart", this._almostMove, this)
       .on("almost:out", this._almostOut, this)
-      // .on("touchend touchcancel", this._onTouchEnd, this)
+      .on("touchend touchcancel", this._onTouchEnd, this)
       .on("touchmove", this._onTouchMove, this)
     this.mapContainer
       .addEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
-      document.addEventListener('touchstart', L.DomEvent.preventDefault, {passive: false});
-      L.DomEvent
-			.on(document, 'touchend', this._onTouchEnd, this);
-     
+      document.addEventListener('touchstart', L.DomEvent.preventDefault, {passive: false});     
   
   },
 
@@ -79,7 +76,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._map
       .off("almost:move almost:touchstart", this._almostMove, this)
       .off("almost:out", this._almostOut, this)
-      // .off("touchend touchcancel", this._onTouchEnd, this)
+      .off("touchend touchcancel", this._onTouchEnd, this)
       .off("touchmove", this._onTouchMove, this)
 
       
@@ -87,7 +84,8 @@ L.Draw.Trace = L.Draw.Polyline.extend({
       .removeEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
     delete this.mapContainer;
     document.removeEventListener('touchstart', L.DomEvent.preventDefault);
-    L.DomEvent.off(document, 'touchend', this._onMouseUp, this);
+    
+    L.DomEvent.off(document, 'touchend', this._onTouchEnd, this);
 
   },
   _almostOut: function (_e) {
@@ -152,18 +150,17 @@ L.Draw.Trace = L.Draw.Polyline.extend({
   
     this.start = turf.point([this.almostLatLng.lng, this.almostLatLng.lat]);
     this.closest = this._map.almostOver.getClosest(this.almostLatLng).closestLine;
-    console.log(this.almostLatLng)
     this._startPoint.call(this, this.almostLatLng.lng, this.almostLatLng.lat);
   },
   
   _onMouseUp: function (e) {
+    console.log("mouseup")
     L.Draw.Polyline.prototype._onMouseUp.call(this, e);
 
     this._map.dragging.enable();
     this.lineStart = false;
   },
   _onMouseLeave: function (e){
-    console.log("hi")
     this._endPoint.call(e);
     this._map.dragging.enable();
     this.lineStart = false;
@@ -179,23 +176,27 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     L.DomEvent.preventDefault(e.originalEvent);
 		
     if (this.lineStart) {
-     
       this.addVertex(this.almostLatLng);
     }
 		
   },
 
-  _onTouchEnd: function(e){
-    console.log("hi")
+  _onTouchEnd: function(e){    
     //TODO: see mouseup
-    this._endPoint.call(e);
+    console.log(this)
+    console.log(e)
+    this._endPoint.call(0, 0, this);
 
     this._map.dragging.enable();
     this.lineStart = false;
   },
 
   _onTouch: function (e) {
-		const originalEvent = e.originalEvent;
+    const originalEvent = e.originalEvent;
+    L.DomEvent
+			.on(document, 'touchend', this._onTouchEnd, this)
+			.preventDefault(originalEvent);
+		
 		if (originalEvent.touches && originalEvent.touches[0] && !this._clickHandled && !this._touchHandled && !this._disableMarkers && this.almostLatLng != false) {
       this._touchHandled = true;
       this._onTouchMove(e)
@@ -235,11 +236,13 @@ L.Draw.Trace = L.Draw.Polyline.extend({
    * if there are issues down the line that could be the cause 
    **/
  _endPoint: function (_clientX, _clientY, _e) {
+  console.log(this)
   if (this._mouseDownOrigin) {
+    console.log("yes")
     this._finishShape();
     this._enableNewMarkers(); // after a short pause, enable new markers
   }
-  this._mouseDownOrigin = null;
+  // this._mouseDownOrigin = null;
 }, 
   _createMarker: function (latlng) {
     var marker = new L.Marker(latlng, {
