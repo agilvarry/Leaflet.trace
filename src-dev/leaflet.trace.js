@@ -73,6 +73,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     delete this._touchHandled;
     delete this._disableMarkers;
     delete this.closest;
+    delete this._mouseDownOrigin;
     this._map
       .off("almost:move almost:touchstart", this._almostMove, this)
       .off("almost:out", this._almostOut, this)
@@ -80,12 +81,11 @@ L.Draw.Trace = L.Draw.Polyline.extend({
       .off("touchmove", this._onTouchMove, this)
 
       
-    this.mapContainer
-      .removeEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
+    this.mapContainer.removeEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
     delete this.mapContainer;
     document.removeEventListener('touchstart', L.DomEvent.preventDefault);
     
-    L.DomEvent.off(document, 'touchend', this._onTouchEnd, this);
+    L.DomEvent.off(document, 'touchend', ()=>{this._onTouchEnd(this)})
 
   },
   _almostOut: function (_e) {
@@ -160,10 +160,10 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._map.dragging.enable();
     this.lineStart = false;
   },
-  _onMouseLeave: function (e){
-    this._endPoint.call(e);
-    this._map.dragging.enable();
-    this.lineStart = false;
+  _onMouseLeave: function (trace){
+    trace._endPoint.call(trace);
+    trace._map.dragging.enable();
+    trace.lineStart = false;
   },
 
   _onTouchMove: function (e) {
@@ -183,9 +183,8 @@ L.Draw.Trace = L.Draw.Polyline.extend({
 
   _onTouchEnd: function(e){    
     //TODO: see mouseup
-    console.log(this)
-    console.log(e)
-    this._endPoint.call(0, 0, this);
+
+    this._endPoint.call(e);
 
     this._map.dragging.enable();
     this.lineStart = false;
@@ -194,7 +193,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
   _onTouch: function (e) {
     const originalEvent = e.originalEvent;
     L.DomEvent
-			.on(document, 'touchend', this._onTouchEnd, this)
+			.on(document, 'touchend', ()=>{this._onTouchEnd(this)})
 			.preventDefault(originalEvent);
 		
 		if (originalEvent.touches && originalEvent.touches[0] && !this._clickHandled && !this._touchHandled && !this._disableMarkers && this.almostLatLng != false) {
@@ -242,7 +241,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._finishShape();
     this._enableNewMarkers(); // after a short pause, enable new markers
   }
-  // this._mouseDownOrigin = null;
+  this._mouseDownOrigin = null;
 }, 
   _createMarker: function (latlng) {
     var marker = new L.Marker(latlng, {
