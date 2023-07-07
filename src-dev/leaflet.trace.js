@@ -421,17 +421,6 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     }
     L.Draw.SimpleShape.prototype._onMouseUp.call(this);
   },
-
-  // _onMouseMove: function (e) {
-	// 	var latlng = e.latlng;
-
-	// 	this._tooltip.updatePosition(latlng);
-	// 	if (this._isDrawing) {
-  //     console.log(this._map.dragging._enabled)
-	// 		this._tooltip.updateContent(this._getTooltipText());
-	// 		this._drawShape(latlng);
-	// 	}
-	// },
 });
 
 /**

@@ -8,7 +8,6 @@ L.Draw.Trace = L.Draw.Polyline.extend({
   statics: {
     TYPE: "trace",
   },
-  //TODO i only want to edit shapeOptions, the rest need not be copied over
   options: {
     allowIntersection: true,
     repeatMode: false,
@@ -46,39 +45,41 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     L.Draw.Polyline.prototype.initialize.call(this, map, options);
     this.type = L.Draw.Trace.TYPE;
     this.options.drawError.message = "You must draw over the selected line.";
-    //TODO: Not sure if this ill interfere with other polyline drawing
   },
 
   addHooks: function () {
-  this.mapContainer = document.getElementById(this._map._container.id);
-
-  
+    this.mapContainer = document.getElementById(this._map._container.id);
     L.Draw.Polyline.prototype.addHooks.call(this);
     this.almostLatLng = false;
 
     this._map
-      .on("almost:move", this._almostMove, this)
+      .on("almost:move almost:touchstart", this._almostMove, this)
       .on("almost:out", this._almostOut, this)
+      .on("touchmove", this._onTouchMove, this)
     this.mapContainer
       .addEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
-     
   
   },
 
   removeHooks: function () {
+    this._map.dragging.enable();
     L.Draw.Polygon.prototype.removeHooks.call(this);
     delete this.almostLatLng;
     delete this.linestart;
     delete this._clickHandled;
+    delete this._touchHandled;
     delete this._disableMarkers;
     delete this.closest;
+    delete this._mouseDownOrigin;
     this._map
-      .off("almost:move", this._almostMove, this)
+      .off("almost:move almost:touchstart", this._almostMove, this)
       .off("almost:out", this._almostOut, this)
+      .off("touchmove", this._onTouchMove, this)
+
       
-    this.mapContainer
-      .removeEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
+    this.mapContainer.removeEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
     delete this.mapContainer;
+    
   },
   _almostOut: function (_e) {
     this.almostLatLng = false;
@@ -116,42 +117,78 @@ L.Draw.Trace = L.Draw.Polyline.extend({
       this._vertexChanged(latlng, true);
     }
   },
-  _onMouseMove: function (e) {
+  _onMouseMove: function (e) { 
     L.Draw.Polyline.prototype._onMouseMove.call(this, e);
-    //add a vertex on mouse move if slready drawing started
+    //add a vertex on mouse move if already drawing started
     if (this.lineStart) {
       this.addVertex(this.almostLatLng);
     }
   },
   _onMouseDown: function (e) {
     if (!this._clickHandled && !this._touchHandled && !this._disableMarkers && this.almostLatLng != false) {
-      this._map.dragging.disable();
       this._onMouseMove(e);
       this._clickHandled = true;
-      this._disableNewMarkers();
-      this.lineStart = true;
-    
-      this.start = turf.point([this.almostLatLng.lng, this.almostLatLng.lat]);
-      this.closest = this._map.almostOver.getClosest(this.almostLatLng).closestLine;
-      this._startPoint.call(this, this.almostLatLng.lng, this.almostLatLng.lat);
+      this.startDraw()
     }
   },
   _latlngToArray: function (lls) {
     if (Array.isArray(lls)) return lls.map((ll) => this._latlngToArray(ll));
     else return [lls.lng, lls.lat];
   },
+
+  startDraw: function() {
+    this._map.dragging.disable();
+    this._disableNewMarkers();
+    this.lineStart = true;
+  
+    this.start = turf.point([this.almostLatLng.lng, this.almostLatLng.lat]);
+    this.closest = this._map.almostOver.getClosest(this.almostLatLng).closestLine;
+    this._startPoint.call(this, this.almostLatLng.lng, this.almostLatLng.lat);
+  },
   
   _onMouseUp: function (e) {
     L.Draw.Polyline.prototype._onMouseUp.call(this, e);
-
-    this._map.dragging.enable();
     this.lineStart = false;
   },
   _onMouseLeave: function (trace){
     trace._endPoint.call(trace);
-    trace._map.dragging.enable();
     trace.lineStart = false;
   },
+
+  _onTouchMove: function (e) {
+    const newPos = this._map.mouseEventToLayerPoint(e.originalEvent.touches[0]);
+		const	latlng = this._map.layerPointToLatLng(newPos);
+
+    this._currentLatLng = latlng;
+    this._updateTooltip(latlng);
+    this._updateGuide(newPos);
+    L.DomEvent.preventDefault(e.originalEvent);
+		
+    if (this.lineStart) {
+      this.addVertex(this.almostLatLng);
+    }
+		
+  },
+
+  _onTouchEnd: function(e){    
+    this._endPoint.call(e);
+    this.lineStart = false;
+    L.DomEvent.off(document, 'touchend', ()=>{this._onTouchEnd(this)})
+  },
+
+  _onTouch: function (e) {
+    const originalEvent = e.originalEvent;
+    L.DomEvent
+			.on(document, 'touchend', ()=>{this._onTouchEnd(this)})
+			.preventDefault(originalEvent);
+		
+		if (originalEvent.touches && originalEvent.touches[0] && !this._clickHandled && !this._touchHandled && !this._disableMarkers && this.almostLatLng != false) {
+      this._touchHandled = true;
+      this._onTouchMove(e)
+			this.startDraw()
+		}
+		this._clickHandled = null;
+	},
 
   _getTooltipText: function () {
 		var showLength = this.options.showLength,
@@ -258,19 +295,18 @@ L.Draw.Select = L.Draw.Rectangle.extend({
   },
   
   initialize: function (map, options) {
-    // Save the type so super can fire, need to do this as cannot do this.TYPE :(
-    L.Draw.Rectangle.prototype.initialize.call(this, map, options);
     this._map = map;
     this._initialLabelText = "Click and drag to select a line.";
     this.options.showArea = false
     this.type = L.Draw.Select.TYPE;
+    L.Draw.SimpleShape.prototype.initialize.call(this, map, options);
   },
 
   // @method addHooks(): void
   // Add listener hooks to this handler.
   addHooks: function () {
-    L.Draw.Rectangle.prototype.addHooks.call(this);
-    //TODO: make more elegant if i can
+    L.Draw.SimpleShape.prototype.addHooks.call(this);
+
     let s;
     this._map.eachLayer(function (layer) {
       if (layer.options.selected) {
@@ -278,7 +314,6 @@ L.Draw.Select = L.Draw.Rectangle.extend({
       }
     });
     this.selected = s;
-    // this.selectedItem = new L.FeatureGroup().addTo(this._map);
     this._map.on(L.Draw.Event.CREATED, this._created, this);
   },
   _enableSelect: function () {
@@ -631,12 +666,12 @@ L.Handler.AlmostOver = L.Handler.extend({
 
   addHooks: function () {
       if (this._map.options.almostOnMouseMove) {
-          this._map.on('mousemove', this.__mouseMoveSampling, this);
+          this._map.on('mousemove touchmove', this.__mouseMoveSampling, this);
           this._map.on('mousemovesample', this._onMouseMove, this);
+          
       }
-      this._map.on('click dblclick', this._onMouseClick, this);
+      this._map.on('click dblclick touchstart', this._onMouseClick, this);
 
-      var map = this._map;
       function computeBuffer() {
           this._buffer = this._map.layerPointToLatLng([0, 0]).lat -
                          this._map.layerPointToLatLng([this._map.options.almostDistance,
@@ -648,8 +683,8 @@ L.Handler.AlmostOver = L.Handler.extend({
 
   removeHooks: function () {
       this._map.off('mousemovesample');
-      this._map.off('mousemove', this.__mouseMoveSampling, this);
-      this._map.off('click dblclick', this._onMouseClick, this);
+      this._map.off('mousemove touchmove', this.__mouseMoveSampling, this);
+      this._map.off('click dblclick touchstart', this._onMouseClick, this);
   },
 
   addLayer: function (layer) {
@@ -683,7 +718,6 @@ L.Handler.AlmostOver = L.Handler.extend({
       }
       this._previous = null;
   },
-  //TODO: here is the main place we need to edit
   getClosest: function (latlng) {
       let distance = this._map.options.almostDistance;
       if (this._layers.length > 0){
@@ -774,8 +808,7 @@ L.Handler.AlmostOver = L.Handler.extend({
   _onMouseClick: function (e) {
       var closest = this.getClosest(e.latlng);
       if (closest) {
-          this._map.fire('almost:' + e.type, {layer: closest.layer,
-                                              latlng: closest.latlng});
+          this._map.fire('almost:' + e.type, {layer: closest.layer, latlng: closest.latlng});
       }
   },
 });

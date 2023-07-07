@@ -13,8 +13,8 @@ To include it in your app using a cdn add the following to the top of your html
 <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw-src.css" />
 <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script> 
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet-trace@0.2.8/dist/leaflet.trace.css" />
-<script type="module" src="https://unpkg.com/leaflet-trace@0.2.8/dist/leaflet.trace.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-trace@0.3.0/dist/leaflet.trace.css" />
+<script type="module" src="https://unpkg.com/leaflet-trace@0.3.0/dist/leaflet.trace.js"></script>
 ```
 If you install using npm adding this to your html should do the trick:
 
