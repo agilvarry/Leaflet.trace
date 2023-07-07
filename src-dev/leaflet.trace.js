@@ -57,11 +57,9 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._map
       .on("almost:move almost:touchstart", this._almostMove, this)
       .on("almost:out", this._almostOut, this)
-      .on("touchend touchcancel", this._onTouchEnd, this)
       .on("touchmove", this._onTouchMove, this)
     this.mapContainer
       .addEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
-      document.addEventListener('touchstart', L.DomEvent.preventDefault, {passive: false});     
   
   },
 
@@ -77,16 +75,12 @@ L.Draw.Trace = L.Draw.Polyline.extend({
     this._map
       .off("almost:move almost:touchstart", this._almostMove, this)
       .off("almost:out", this._almostOut, this)
-      .off("touchend touchcancel", this._onTouchEnd, this)
       .off("touchmove", this._onTouchMove, this)
 
       
     this.mapContainer.removeEventListener("mouseleave", ()=>{this._onMouseLeave(this)})
     delete this.mapContainer;
-    document.removeEventListener('touchstart', L.DomEvent.preventDefault);
     
-    L.DomEvent.off(document, 'touchend', ()=>{this._onTouchEnd(this)})
-
   },
   _almostOut: function (_e) {
     this.almostLatLng = false;
@@ -154,7 +148,6 @@ L.Draw.Trace = L.Draw.Polyline.extend({
   },
   
   _onMouseUp: function (e) {
-    console.log("mouseup")
     L.Draw.Polyline.prototype._onMouseUp.call(this, e);
 
     this._map.dragging.enable();
@@ -182,12 +175,10 @@ L.Draw.Trace = L.Draw.Polyline.extend({
   },
 
   _onTouchEnd: function(e){    
-    //TODO: see mouseup
-
     this._endPoint.call(e);
-
     this._map.dragging.enable();
     this.lineStart = false;
+    L.DomEvent.off(document, 'touchend', ()=>{this._onTouchEnd(this)})
   },
 
   _onTouch: function (e) {
@@ -235,9 +226,7 @@ L.Draw.Trace = L.Draw.Polyline.extend({
    * if there are issues down the line that could be the cause 
    **/
  _endPoint: function (_clientX, _clientY, _e) {
-  console.log(this)
   if (this._mouseDownOrigin) {
-    console.log("yes")
     this._finishShape();
     this._enableNewMarkers(); // after a short pause, enable new markers
   }
@@ -311,12 +300,11 @@ L.Draw.Select = L.Draw.Rectangle.extend({
   },
   
   initialize: function (map, options) {
-    // Save the type so super can fire, need to do this as cannot do this.TYPE :(
-    L.Draw.Rectangle.prototype.initialize.call(this, map, options);
     this._map = map;
     this._initialLabelText = "Click and drag to select a line.";
     this.options.showArea = false
     this.type = L.Draw.Select.TYPE;
+    L.Draw.SimpleShape.prototype.initialize.call(this, map, options);
   },
 
   // @method addHooks(): void
@@ -437,6 +425,17 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     }
     L.Draw.SimpleShape.prototype._onMouseUp.call(this);
   },
+
+  _onMouseMove: function (e) {
+		var latlng = e.latlng;
+
+		this._tooltip.updatePosition(latlng);
+		if (this._isDrawing) {
+      console.log("latlng")
+			this._tooltip.updateContent(this._getTooltipText());
+			this._drawShape(latlng);
+		}
+	},
 });
 
 /**
