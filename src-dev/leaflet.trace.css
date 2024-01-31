@@ -9,22 +9,20 @@
     background-size: auto;
 
 }
+
 .leaflet-draw-toolbar-top .leaflet-draw-draw-select {
     background-image: url('images/select.svg');
     background-size: auto;
-
 }
 
 .leaflet-draw-toolbar-top .leaflet-draw-draw-unselect {
     background-image: url('images/select-clear.svg');
     background-size: auto;
-
 }
 
 .leaflet-retina .leaflet-draw-toolbar-top .leaflet-draw-draw-unselect {
     background-image: url('images/select-clear.svg');
     background-size: auto;
-
 }
 
 .leaflet-retina .leaflet-draw-toolbar-top .leaflet-draw-draw-trace {
@@ -36,11 +34,29 @@
 .leaflet-retina .leaflet-draw-toolbar-top .leaflet-draw-draw-trace-active {
     background-image: url('images/trace-line.svg');
     background-size: auto;
-
 }
 
 .leaflet-retina .leaflet-draw-toolbar-top .leaflet-draw-draw-select {
     background-image: url('images/select.svg');
     background-size: auto;
+}
 
+.leaflet-draw-toolbar-top .leaflet-draw-draw-circlemarker {
+    filter: contrast(15%) brightness(175%);
+    pointer-events: none;
+    background-position: -271px -1px;
+}
+
+.leaflet-retina .leaflet-draw-toolbar-top .leaflet-draw-draw-circlemarker {
+    filter: contrast(15%) brightness(175%);
+    pointer-events: none;
+    background-position: -271px -1px;
+}
+
+.leaflet-draw-toolbar-top .leaflet-draw-draw-circlemarker-active {
+    background-position: -271px -1px;
+}
+
+.leaflet-retina .leaflet-draw-toolbar-top .leaflet-draw-draw-circlemarker-active {
+    background-position: -271px -1px;
 }

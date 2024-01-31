@@ -317,6 +317,10 @@ L.Draw.Select = L.Draw.Rectangle.extend({
     this._map.on(L.Draw.Event.CREATED, this._created, this);
   },
   _enableSelect: function () {
+    const circle_button = document.getElementsByClassName("leaflet-draw-draw-circlemarker")[0];
+    if(circle_button){
+      circle_button.className = "leaflet-draw-draw-circlemarker-active";
+    }
     const button = document.getElementsByClassName("leaflet-draw-draw-trace")[0];
     if(button){
       button.className = "leaflet-draw-draw-trace-active";
@@ -455,6 +459,10 @@ L.Draw.Unselect = L.Handler.extend({
 		}
 	},
   disableSelect: function(){
+    const circle_button = document.getElementsByClassName("leaflet-draw-draw-circlemarker-active")[0];
+    if(circle_button){
+      circle_button.className = "leaflet-draw-draw-circlemarker";
+    }
     const button = document.getElementsByClassName("leaflet-draw-draw-trace-active")[0];
     if(button){
       button.className = "leaflet-draw-draw-trace";
