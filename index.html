@@ -70,7 +70,7 @@
       const drawnItems = new L.featureGroup().addTo(map);
       L.esri
         .featureLayer({
-          url: "https://maps.udot.utah.gov/randh/rest/services/PrimaryRoutes/MapServer/0",
+          url: "https://roads.udot.utah.gov/server/rest/services/Public/UDOT_Routes/MapServer/0",
           useCors: true,
         })
         .query()
